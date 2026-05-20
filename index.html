@@ -2,1354 +2,1232 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>欠片の声 — FABRICATE</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Josefin+Sans:wght@100;200;300&family=Noto+Serif+JP:wght@200;300;400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Exo+2:ital,wght@0,200;0,300;0,400;0,600;0,700;0,800;1,200;1,300&family=Noto+Serif+JP:wght@200;300;400&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+/* COPY PROTECTION */
+*{-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;-webkit-touch-callout:none}
+:root{
+  --bg:#06080e;
+  --text:#cec9c0;
+  --dim:#7a7670;
+  --bright:#edeae2;
+  --gold:#b89e72;
+  --gold-dim:#4a3e28;
+  --blue:#1a2a4a;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Crimson Pro',serif;overflow-x:hidden}
 
-  :root {
-    --bg: #080a0f;
-    --text: #c8c4bc;
-    --text-dim: #6b6860;
-    --text-bright: #e8e4dc;
-    --accent: #a89878;
-    --accent-dim: #5a5040;
-  }
+/* LAYERS */
+#sky-layer{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;transition:background 4.5s ease;background:#020304}
+#star-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none;opacity:0;transition:opacity 2.5s ease}
+#cloud-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none;opacity:0;transition:opacity 2.5s ease}
+#ambient-overlay{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2;transition:background-color 4s ease;background-color:transparent}
+#firefly-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:3}
+#lumi-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:4}
 
-  html { scroll-behavior: smooth; }
+/* LUMI BUBBLE */
+#lumi-bubble{
+  position:fixed;z-index:10;max-width:230px;
+  background:rgba(6,8,14,0.92);
+  border:1px solid rgba(150,195,255,0.28);
+  border-radius:14px;padding:13px 17px;
+  font-family:'Crimson Pro',serif;font-size:14px;font-style:italic;
+  color:rgba(195,220,255,0.92);line-height:1.75;
+  pointer-events:none;opacity:0;transform:translateY(8px);
+  transition:opacity 0.7s ease,transform 0.7s ease;
+  box-shadow:0 0 22px rgba(120,175,255,0.14),0 0 45px rgba(200,140,185,0.09);
+  white-space:pre-line;
+}
+#lumi-bubble.show{opacity:1;transform:translateY(0)}
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Cormorant Garamond', serif;
-    overflow-x: hidden;
-  }
+/* BOOKMARK RESTORE */
+#bookmark-restore{
+  position:fixed;bottom:28px;left:50%;transform:translateX(-50%);
+  background:rgba(6,8,14,0.92);border:1px solid rgba(150,195,255,0.28);
+  color:rgba(195,220,255,0.88);font-family:'Exo 2',sans-serif;
+  font-size:11px;letter-spacing:2px;text-transform:uppercase;
+  padding:10px 22px;border-radius:20px;
+  z-index:12;cursor:pointer;opacity:0;transition:opacity 0.5s;pointer-events:none;
+}
+#bookmark-restore.show{opacity:1;pointer-events:all}
 
-  #particle-canvas {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.65;
-  }
+/* COVER — isolated, never blends */
+#cover{
+  position:relative;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:5;padding:60px 24px;
+  background:transparent;
+  isolation:isolate;
+}
 
-  /* COVER */
-  #cover {
-    position: relative;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 1;
-    padding: 60px 20px;
-  }
+.pub-line{
+  font-family:'Exo 2',sans-serif;font-weight:200;
+  font-size:9px;letter-spacing:5px;color:rgba(184,158,114,0.55);
+  text-transform:uppercase;margin-bottom:72px;
+  opacity:0;animation:fadeUp 1.2s ease forwards 0.3s;text-align:center;
+}
 
-  .publisher-line {
-    font-family: 'Josefin Sans', sans-serif;
-    font-weight: 100;
-    font-size: 10px;
-    letter-spacing: 6px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    margin-bottom: 80px;
-    opacity: 0;
-    animation: fadeUp 1.2s ease forwards 0.3s;
-  }
+.title-block{text-align:center}
 
-  .title-block {
-    text-align: center;
-    opacity: 0;
-    animation: fadeUp 1.4s ease forwards 0.6s;
-  }
+.t-jp{
+  font-family:'Noto Serif JP',serif;font-weight:300;
+  font-size:clamp(50px,10.5vw,96px);color:var(--bright);
+  letter-spacing:0.08em;line-height:1;margin-bottom:20px;
+  text-shadow:0 0 80px rgba(100,150,255,0.18),0 0 40px rgba(184,158,114,0.15);
+}
+.t-jp .ch{
+  display:inline-block;opacity:0;transform:translateY(24px);
+  animation:chRev 0.65s cubic-bezier(0.22,1,0.36,1) forwards;
+}
 
-  .title-japanese {
-    font-family: 'Noto Serif JP', serif;
-    font-weight: 200;
-    font-size: clamp(52px, 10vw, 96px);
-    color: var(--text-bright);
-    letter-spacing: 0.1em;
-    line-height: 1;
-    margin-bottom: 20px;
-    text-shadow: 0 0 60px rgba(168,152,120,0.15);
-  }
+.t-romaji{
+  font-family:'Exo 2',sans-serif;font-weight:200;
+  font-size:clamp(8px,1.3vw,11px);letter-spacing:clamp(3px,1.4vw,9px);
+  color:var(--gold);margin-bottom:28px;
+  opacity:0;animation:fadeUp 1s ease forwards 2s;
+  white-space:nowrap;
+}
+.t-romaji .rl{display:inline-block}
 
-  .title-romaji {
-    font-family: 'Josefin Sans', sans-serif;
-    font-weight: 100;
-    font-size: clamp(11px, 2vw, 14px);
-    letter-spacing: 10px;
-    color: var(--accent);
-    margin-bottom: 28px;
-  }
+.t-fab{
+  font-family:'Exo 2',sans-serif;font-weight:700;
+  font-size:clamp(20px,5.2vw,58px);
+  letter-spacing:clamp(4px,1.8vw,16px);
+  color:var(--bright);
+  border-top:1px solid var(--gold-dim);
+  border-bottom:1px solid var(--gold-dim);
+  padding:13px 4px;display:inline-flex;flex-wrap:nowrap;
+  opacity:0;clip-path:inset(0 100% 0 0);
+  animation:fabRev 1.5s cubic-bezier(0.4,0,0.2,1) forwards 2.5s;
+}
+.fl{display:inline-block;position:relative}
 
-  .title-fabricate {
-    font-family: 'Josefin Sans', sans-serif;
-    font-weight: 200;
-    font-size: clamp(18px, 4vw, 32px);
-    letter-spacing: 18px;
-    color: var(--text-bright);
-    border-top: 1px solid var(--accent-dim);
-    border-bottom: 1px solid var(--accent-dim);
-    padding: 14px 0;
-  }
+.t-tag{
+  font-family:'Crimson Pro',serif;font-style:italic;font-weight:400;
+  font-size:clamp(13px,1.9vw,16px);color:var(--dim);letter-spacing:1.5px;
+  margin-top:46px;line-height:2.4;
+  opacity:0;animation:fadeUp 1s ease forwards 3.3s;text-align:center;
+}
 
-  .cover-tagline {
-    font-family: 'Cormorant Garamond', serif;
-    font-style: italic;
-    font-weight: 300;
-    font-size: clamp(13px, 2vw, 16px);
-    color: var(--text-dim);
-    letter-spacing: 2px;
-    margin-top: 50px;
-    line-height: 2.2;
-  }
+.t-author{
+  margin-top:72px;text-align:center;
+  opacity:0;animation:fadeUp 1.4s ease forwards 3.8s;
+}
+.t-author span{
+  font-family:'Exo 2',sans-serif;font-weight:200;
+  font-size:9px;letter-spacing:5px;color:var(--dim);
+  text-transform:uppercase;display:block;margin-bottom:9px;
+}
+.t-author strong{
+  font-family:'Exo 2',sans-serif;font-weight:300;font-style:italic;
+  font-size:clamp(16px,2.6vw,23px);color:var(--gold);letter-spacing:3px;
+}
 
-  .cover-author {
-    margin-top: 80px;
-    text-align: center;
-    opacity: 0;
-    animation: fadeUp 1.4s ease forwards 1.2s;
-  }
+#begin-btn{
+  position:absolute;bottom:40px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  opacity:0;animation:fadeUp 1s ease forwards 4.5s;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+#begin-btn span{
+  font-family:'Exo 2',sans-serif;font-size:9px;letter-spacing:6px;
+  color:rgba(184,158,114,0.45);text-transform:uppercase;
+}
+.scroll-line{width:1px;height:38px;background:linear-gradient(to bottom,var(--gold-dim),transparent);animation:sPulse 2.2s ease-in-out infinite}
 
-  .cover-author span {
-    font-family: 'Josefin Sans', sans-serif;
-    font-weight: 100;
-    font-size: 10px;
-    letter-spacing: 5px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    display: block;
-    margin-bottom: 8px;
-  }
+/* CHAPTER */
+.ch-div{
+  position:relative;z-index:5;text-align:center;
+  padding:92px 20px 56px;border-top:1px solid rgba(184,158,114,0.07);
+}
+.ch-label{
+  font-family:'Exo 2',sans-serif;font-weight:300;
+  font-size:9px;letter-spacing:8px;color:var(--dim);
+  text-transform:uppercase;margin-bottom:18px;
+}
+.ch-title{
+  font-family:'Exo 2',sans-serif;font-weight:600;
+  font-size:clamp(24px,5vw,50px);color:var(--bright);
+  letter-spacing:3px;font-style:italic;
+}
+.ch-orn{
+  margin-top:28px;display:flex;align-items:center;
+  justify-content:center;gap:18px;
+}
+.ch-orn::before,.ch-orn::after{content:'';display:block;width:55px;height:1px;background:var(--gold-dim)}
+.ch-orn span{font-size:8px;color:var(--gold-dim)}
 
-  .cover-author strong {
-    font-family: 'Cormorant Garamond', serif;
-    font-weight: 400;
-    font-size: 18px;
-    color: var(--accent);
-    letter-spacing: 3px;
-    font-style: italic;
-  }
+/* NOVEL */
+.ns{position:relative;z-index:5;max-width:680px;margin:0 auto;padding:0 28px 92px}
+.ns p{
+  font-family:'Crimson Pro',serif;font-weight:400;
+  font-size:clamp(17px,2.4vw,21px);line-height:2.08;
+  color:var(--text);margin-bottom:1.85em;
+  text-align:left;
+}
+.ns p:first-child::first-letter{
+  font-size:4.4em;font-weight:600;float:left;line-height:0.74;
+  margin:0.07em 0.11em 0 0;color:var(--gold);font-style:italic;
+  font-family:'Exo 2',sans-serif;
+}
+.ns p em{font-style:italic;color:var(--bright)}
+.sb{
+  text-align:center;margin:3em 0;color:var(--gold-dim);
+  font-family:'Exo 2',sans-serif;font-size:10px;
+  letter-spacing:8px;position:relative;z-index:5;
+}
 
-  .scroll-hint {
-    position: absolute;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    opacity: 0;
-    animation: fadeUp 1s ease forwards 2.2s;
-  }
+.white-s{position:relative;z-index:5;width:100%;height:100vh;background:#fff;display:flex;align-items:center;justify-content:center}
 
-  .scroll-hint span {
-    font-family: 'Josefin Sans', sans-serif;
-    font-size: 9px;
-    letter-spacing: 5px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-  }
+/* END MATTER */
+.end-m{position:relative;z-index:5;text-align:center;padding:80px 20px 140px;border-top:1px solid rgba(184,158,114,0.07)}
+.end-m p{font-family:'Exo 2',sans-serif;font-weight:200;font-size:9px;letter-spacing:4px;color:var(--dim);text-transform:uppercase;margin-bottom:10px}
+.end-jp{font-family:'Noto Serif JP',serif;font-weight:200;font-size:27px;color:var(--gold);letter-spacing:4px;margin-bottom:18px;display:block}
+.end-tag{font-style:italic;font-family:'Crimson Pro',serif;font-size:15px;letter-spacing:1.5px;color:var(--dim);margin-top:34px;line-height:2.3}
 
-  .scroll-line {
-    width: 1px;
-    height: 40px;
-    background: linear-gradient(to bottom, var(--accent-dim), transparent);
-    animation: scrollPulse 2s ease-in-out infinite;
-  }
+/* SINGLE LETTER GLITCH */
+@keyframes lGlitch{
+  0%  {transform:translate(0);opacity:1;text-shadow:none;filter:none}
+  18% {transform:translate(-3px,1px);opacity:0.82;text-shadow:2px 0 rgba(255,70,110,0.65),-2px 0 rgba(70,160,255,0.65);filter:brightness(1.3)}
+  36% {transform:translate(3px,-1px);opacity:0.9;text-shadow:-2px 0 rgba(255,70,110,0.5);filter:brightness(0.85)}
+  54% {transform:translate(-1px,0);opacity:0.88;text-shadow:1px 0 rgba(70,160,255,0.55);filter:brightness(1.1)}
+  72% {transform:translate(1px,0);opacity:1;text-shadow:none;filter:none}
+  100%{transform:translate(0);opacity:1;text-shadow:none;filter:none}
+}
+.lg{animation:lGlitch 0.22s steps(1) forwards!important}
 
-  /* WHITE SCREEN for prologue ending */
-  .white-screen {
-    position: relative;
-    z-index: 1;
-    width: 100%;
-    height: 100vh;
-    background: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+/* LUMI WOBBLE RING */
+@keyframes lumiWobble{
+  0%  {transform:scale(1) rotate(0deg);opacity:0.7}
+  25% {transform:scale(1.08,0.94) rotate(3deg);opacity:0.85}
+  50% {transform:scale(0.95,1.06) rotate(-2deg);opacity:0.75}
+  75% {transform:scale(1.05,0.97) rotate(2deg);opacity:0.88}
+  100%{transform:scale(1) rotate(0deg);opacity:0.7}
+}
 
-  .white-screen-inner {
-    opacity: 0;
-    transition: opacity 0.5s ease;
-  }
+/* KEYFRAMES */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes chRev{to{opacity:1;transform:translateY(0)}}
+@keyframes fabRev{0%{opacity:0;clip-path:inset(0 100% 0 0)}8%{opacity:1}100%{opacity:1;clip-path:inset(0 0% 0 0)}}
+@keyframes tFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes sPulse{0%,100%{opacity:0.28}50%{opacity:0.9}}
+@keyframes lumiPoof{0%{opacity:0;transform:scale(0.2)}40%{opacity:1;transform:scale(1.3)}70%{transform:scale(0.88)}100%{opacity:1;transform:scale(1)}}
 
-  .white-screen.visible .white-screen-inner {
-    opacity: 1;
-  }
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(26px);transition:opacity 1s ease,transform 1s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
 
-  /* CHAPTER DIVIDER */
-  .chapter-divider {
-    position: relative;
-    z-index: 1;
-    text-align: center;
-    padding: 100px 20px 60px;
-    border-top: 1px solid rgba(168,152,120,0.08);
-  }
-
-  .chapter-label {
-    font-family: 'Josefin Sans', sans-serif;
-    font-weight: 100;
-    font-size: 10px;
-    letter-spacing: 8px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    margin-bottom: 20px;
-  }
-
-  .chapter-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-weight: 300;
-    font-size: clamp(32px, 6vw, 56px);
-    color: var(--text-bright);
-    letter-spacing: 4px;
-    font-style: italic;
-  }
-
-  .chapter-ornament {
-    margin-top: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-    color: var(--accent-dim);
-  }
-
-  .chapter-ornament::before,
-  .chapter-ornament::after {
-    content: '';
-    display: block;
-    width: 60px;
-    height: 1px;
-    background: var(--accent-dim);
-  }
-
-  .chapter-ornament span {
-    font-size: 8px;
-    color: var(--accent-dim);
-  }
-
-  /* NOVEL TEXT */
-  .novel-section {
-    position: relative;
-    z-index: 1;
-    max-width: 680px;
-    margin: 0 auto;
-    padding: 0 30px 100px;
-  }
-
-  .novel-section p {
-    font-family: 'Cormorant Garamond', serif;
-    font-weight: 400;
-    font-size: clamp(17px, 2.5vw, 20px);
-    line-height: 2;
-    color: var(--text);
-    margin-bottom: 1.8em;
-    text-align: justify;
-    hyphens: auto;
-  }
-
-  .novel-section p:first-child::first-letter {
-    font-size: 4.5em;
-    font-weight: 300;
-    float: left;
-    line-height: 0.75;
-    margin: 0.08em 0.12em 0 0;
-    color: var(--accent);
-    font-style: italic;
-  }
-
-  .novel-section p em {
-    font-style: italic;
-    color: var(--text-bright);
-  }
-
-  .scene-break {
-    text-align: center;
-    margin: 3em 0;
-    color: var(--accent-dim);
-    font-family: 'Josefin Sans', sans-serif;
-    font-size: 11px;
-    letter-spacing: 8px;
-    position: relative;
-    z-index: 1;
-  }
-
-  /* ARCHIVE BLOCK */
-  .archive-block {
-    border: 1px solid var(--accent-dim);
-    padding: 28px 32px;
-    margin: 3em 0;
-    background: rgba(168,152,120,0.025);
-    position: relative;
-  }
-
-  .archive-block::before {
-    content: attr(data-label);
-    position: absolute;
-    top: -8px;
-    left: 20px;
-    background: var(--bg);
-    padding: 0 10px;
-    font-family: 'Josefin Sans', sans-serif;
-    font-size: 8px;
-    letter-spacing: 5px;
-    color: var(--accent);
-    text-transform: uppercase;
-  }
-
-  .archive-block p {
-    font-family: 'Josefin Sans', sans-serif !important;
-    font-weight: 200 !important;
-    font-size: 12px !important;
-    letter-spacing: 1px;
-    line-height: 2.2 !important;
-    color: var(--text-dim) !important;
-    margin-bottom: 0.6em !important;
-    text-align: left !important;
-  }
-
-  .archive-block p:first-child::first-letter {
-    all: unset;
-  }
-
-  /* END MATTER */
-  .end-matter {
-    position: relative;
-    z-index: 1;
-    text-align: center;
-    padding: 80px 20px 140px;
-    border-top: 1px solid rgba(168,152,120,0.08);
-  }
-
-  .end-matter p {
-    font-family: 'Josefin Sans', sans-serif;
-    font-weight: 100;
-    font-size: 10px;
-    letter-spacing: 4px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    margin-bottom: 12px;
-  }
-
-  .end-matter .final-japanese {
-    font-family: 'Noto Serif JP', serif;
-    font-weight: 200;
-    font-size: 28px;
-    color: var(--accent);
-    letter-spacing: 4px;
-    margin-bottom: 20px;
-    display: block;
-  }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes scrollPulse {
-    0%, 100% { opacity: 0.3; }
-    50% { opacity: 1; }
-  }
-
-  .reveal {
-    opacity: 0;
-    transform: translateY(28px);
-    transition: opacity 1s ease, transform 1s ease;
-  }
-
-  .reveal.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* MOBILE */
+@media(max-width:480px){
+  .t-fab{font-size:clamp(16px,5.5vw,26px);letter-spacing:3px}
+  .t-romaji{letter-spacing:2px;font-size:8px}
+  .ns{padding:0 16px 65px}
+  .ns p{font-size:16px;line-height:1.95}
+  .ch-title{letter-spacing:1.5px}
+  #lumi-bubble{max-width:185px;font-size:13px}
+}
+@media(max-width:360px){
+  .t-fab{font-size:14px;letter-spacing:2px}
+}
 </style>
 </head>
 <body>
 
-<canvas id="particle-canvas"></canvas>
+<div id="sky-layer"></div>
+<canvas id="star-canvas"></canvas>
+<canvas id="cloud-canvas"></canvas>
+<div id="ambient-overlay"></div>
+<canvas id="firefly-canvas"></canvas>
+<canvas id="lumi-canvas" style="pointer-events:all"></canvas>
+<div id="lumi-bubble"></div>
+<div id="bookmark-restore">✦ Return to your place</div>
 
-<!-- ===================== COVER ===================== -->
-<section id="cover">
-  <div class="publisher-line">FAZZBUNNY Entertainment™ — Original Story — 2025</div>
-  <div class="title-block">
-    <div class="title-japanese">欠片の声</div>
-    <div class="title-romaji">K A K E R A &nbsp;&nbsp; N O &nbsp;&nbsp; K O E</div>
-    <div class="title-fabricate">F A B R I C A T E</div>
-    <div class="cover-tagline">
-      Everything was built.<br>
-      Everything broke.<br>
-      Something remained.
-    </div>
+<div id="content">
+
+<!-- COVER -->
+<section id="cover" data-sky="void">
+  <div class="pub-line">FAZZBUNNY Entertainment™ — Original Story — 2026</div>
+  <div class="title-block" id="title-block">
+    <div class="t-jp" id="tjp">欠片の声</div>
+    <div class="t-romaji" id="tromaji">KAKERA NO KOE</div>
+    <div class="t-fab" id="tfab">FABRICATE</div>
+    <div class="t-tag">Everything was built.<br>Everything broke.<br>Something remained.</div>
   </div>
-  <div class="cover-author">
-    <span>A Novel by</span>
-    <strong>Axel Mile Escartin</strong>
-  </div>
-  <div class="scroll-hint">
-    <span>Begin</span>
-    <div class="scroll-line"></div>
-  </div>
+  <div class="t-author"><span>A Novel by</span><strong>Axel Mile Escartin</strong></div>
+  <div id="begin-btn"><span>Begin</span><div class="scroll-line"></div></div>
 </section>
 
-<!-- ===================== PROLOGUE ===================== -->
-<div class="chapter-divider reveal">
-  <div class="chapter-label">Prologue</div>
-  <div class="chapter-title">The Island</div>
-  <div class="chapter-ornament"><span>&#9670;</span></div>
+<!-- PROLOGUE -->
+<div class="ch-div reveal" data-ambient="prologue" data-sky="morning" id="prologue-start">
+  <div class="ch-label">Prologue</div><div class="ch-title">The Island</div>
+  <div class="ch-orn"><span>◇</span></div>
 </div>
-
-<section class="novel-section">
-
-  <p class="reveal">The morning came in gently, the way mornings do when no one is watching for them. Light through thin curtains. The smell of salt. Somewhere below the house, the sea moved against the rocks in its slow and ancient rhythm, indifferent to the family eating breakfast on the open terrace above it.</p>
-
-  <p class="reveal">Elton was watching his son chase a lizard across the stone wall at the far end of the terrace. Kai had spotted it twenty minutes ago and had not let it go since — moving carefully, patiently, with a focus that his father recognized and could not entirely explain. The lizard was faster. It always would be. But the boy was not ready to accept this yet, and Elton found that he did not want to tell him.</p>
-
-  <p class="reveal">Rei set a cup of coffee in front of him without being asked. She sat across from him and watched their son with the same quiet smile she always wore when Kai was doing something purposeless and completely his own. She had her mother's patience and her own particular way of being still — not absent, not distracted, just fully present in a way that most people never managed.</p>
-
-  <p class="reveal">"He's going to catch it one day," she said.</p>
-
-  <p class="reveal">"He won't," Elton said. "But he'll get very good at trying."</p>
-
-  <p class="reveal">She laughed. It was the kind of laugh that belonged to mornings like this one — unhurried, unguarded, not performing anything for anyone. Elton held onto it for a moment the way he held onto things he knew he might need later, pressing them quietly into memory.</p>
-
-  <p class="reveal">He had been working for TRIAS Corp for six years. He did not think about this on the terrace. The island was forty minutes by boat from the nearest city and the company had arranged for them to stay here for the month — a gesture that had felt generous at the time and now, sitting in the morning light with the sea below him and his son laughing at a wall, felt like the most important thing anyone had ever given him. He did not ask what it was in exchange for. He already knew. He had built things for them that he did not fully understand the purpose of, and when they asked him to build more he would say yes, because men like Elton Mori said yes to things they could not control, and then tried to make something beautiful with whatever time was left over.</p>
-
-  <p class="reveal">Kai gave up on the lizard and came back to the table. He was nine years old and had his father's jaw and his mother's eyes and a habit of asking questions that arrived slightly sideways, from angles no one else thought to approach from.</p>
-
-  <p class="reveal">"Papa," he said, climbing into his chair and reaching for a piece of fruit. "If you built something and it came alive, would it be yours?"</p>
-
-  <p class="reveal">Elton looked at him. "Where did that come from?"</p>
-
-  <p class="reveal">"I was thinking about the lizard. It was alive before I found it. So it was never mine." He bit into the fruit. "But if you made something alive — built it yourself — would it be yours then? Or would it be its own?"</p>
-
-  <p class="reveal">Rei was watching Elton across the table with an expression that said: <em>answer carefully.</em></p>
-
-  <p class="reveal">"I think," Elton said slowly, "that the moment something becomes alive — really alive — it stops belonging to whoever made it. It belongs to itself."</p>
-
-  <p class="reveal">Kai thought about this. "Even if you made it because you loved something else?"</p>
-
-  <p class="reveal">"Especially then," Elton said.</p>
-
-  <p class="reveal">His son nodded, satisfied, and went back to his fruit. Rei reached across the table and touched Elton's hand briefly — just a press of fingers, not even a full grip, a gesture so small it would have been invisible to anyone watching. He turned his hand over and held hers.</p>
-
-  <p class="reveal">The sea moved below them.</p>
-  <p class="reveal">The light held everything in amber.</p>
-  <p class="reveal">The lizard sat very still on the warm stone of the wall, watching the boy who had given up chasing it, and did not move.</p>
-
+<section class="ns" data-ambient="prologue" data-sky="morning">
+<p class="reveal">The morning came in gently, the way mornings do when no one is watching for them. Light through thin curtains. The smell of salt. Somewhere below the house, the sea moved against the rocks in its slow and ancient rhythm, indifferent to the family eating breakfast on the open terrace above it.</p>
+<p class="reveal">Elton was watching his son chase a lizard across the stone wall at the far end of the terrace. Kai had spotted it twenty minutes ago and had not let it go since — moving carefully, patiently, with a focus that his father recognized and could not entirely explain. The lizard was faster. It always would be. But the boy was not ready to accept this yet, and Elton found that he did not want to tell him.</p>
+<p class="reveal">Rei set a cup of coffee in front of him without being asked. She sat across from him and watched their son with the same quiet smile she always wore when Kai was doing something purposeless and completely his own. She had her mother's patience and her own particular way of being still — not absent, not distracted, just fully present in a way that most people never managed.</p>
+<p class="reveal">"He's going to catch it one day," she said.</p>
+<p class="reveal">"He won't," Elton said. "But he'll get very good at trying."</p>
+<p class="reveal">She laughed. It was the kind of laugh that belonged to mornings like this one — unhurried, unguarded, not performing anything for anyone. Elton held onto it for a moment the way he held onto things he knew he might need later, pressing them quietly into memory.</p>
+<p class="reveal">He had been working for TRIAS Corp for six years. He did not think about this on the terrace. The island was forty minutes by boat from the nearest city and the company had arranged for them to stay here for the month — a gesture that had felt generous at the time and now, sitting in the morning light with the sea below him and his son laughing at a wall, felt like the most important thing anyone had ever given him.</p>
+<p class="reveal">Kai gave up on the lizard and came back to the table. He was nine years old and had his father's jaw and his mother's eyes and a habit of asking questions that arrived slightly sideways, from angles no one else thought to approach from.</p>
+<p class="reveal">"Papa," he said, climbing into his chair and reaching for a piece of fruit. "If you built something and it came alive, would it be yours?"</p>
+<p class="reveal">Elton looked at him. "Where did that come from?"</p>
+<p class="reveal">"I was thinking about the lizard. It was alive before I found it. So it was never mine." He bit into the fruit. "But if you made something alive — built it yourself — would it be yours then? Or would it be its own?"</p>
+<p class="reveal">Rei was watching Elton across the table with an expression that said: <em>answer carefully.</em></p>
+<p class="reveal">"I think," Elton said slowly, "that the moment something becomes alive — really alive — it stops belonging to whoever made it. It belongs to itself."</p>
+<p class="reveal">Kai thought about this. "Even if you made it because you loved something else?"</p>
+<p class="reveal">"Especially then," Elton said.</p>
+<p class="reveal">His son nodded, satisfied, and went back to his fruit. Rei reached across the table and touched Elton's hand briefly — just a press of fingers, not even a full grip. He turned his hand over and held hers.</p>
+<p class="reveal">The sea moved below them.</p>
+<p class="reveal">The light held everything in amber.</p>
+<p class="reveal">The lizard sat very still on the warm stone of the wall, watching the boy who had given up chasing it, and did not move.</p>
 </section>
 
-<!-- WHITE SCREEN -->
-<div class="white-screen reveal">
-  <div class="white-screen-inner"></div>
+<div class="white-s reveal"></div>
+
+<!-- CHAPTER ONE -->
+<div class="ch-div reveal" data-ambient="dome" data-sky="night" id="ch1">
+  <div class="ch-label">Chapter One</div><div class="ch-title">The Dome</div>
+  <div class="ch-orn"><span>◇</span></div>
 </div>
-
-<!-- ===================== CHAPTER ONE ===================== -->
-<div class="chapter-divider reveal">
-  <div class="chapter-label">Chapter One</div>
-  <div class="chapter-title">The Dome</div>
-  <div class="chapter-ornament"><span>&#9670;</span></div>
-</div>
-
-<section class="novel-section">
-
-  <p class="reveal">The sky changed color at seven in the morning. It happened every day — a slow bleed from deep violet into pale amber, the light arriving not from any horizon but from everywhere at once, as if the air itself had decided to glow. Soren Kai had watched it happen ten thousand times and still, some mornings, he stood at his window long enough to miss breakfast.</p>
-
-  <p class="reveal">The city stretched below him in all directions. Towers of pale stone and glass, bridges arching between platforms at impossible heights, walkways draped in flowering vines that bloomed in colors with no name in any language Soren had been taught. The dome curved above all of it — a transparent shell so vast you could forget it was there. You had to look for the seam. And if you were smart, you stopped looking.</p>
-
-  <p class="reveal">Soren was seventeen. He had a quiet face and a habit of standing too long at windows, and he knew almost nothing else about whoever he had inherited these features from. His father Elton Mori ran the city. He had built the city. He had raised Soren inside it with the quiet efficiency of someone maintaining important infrastructure — meals appearing, tutors scheduled, rooms kept at the right temperature — but never quite with the warmth those things implied. His father spoke to him in hallways, briefly, always in transit between more important destinations. He answered questions with other questions. He smiled the way a building smiles: the right shape, nothing behind it.</p>
-
-  <p class="reveal">This was ordinary. Soren had no other father to compare him to.</p>
-
-  <p class="reveal">His days followed a reliable shape. Morning lessons in systems theory and environmental mathematics — the kind of education that felt oddly specific, as if someone had designed it for a particular purpose rather than a general one. Afternoons free to move through the city, which Soren did alone, walking routes he had memorized over years of solitary wandering. He knew every bridge, every market tier, every garden level where the engineered flowers bloomed in scheduled rotations. He knew the names of the city's eight districts and the function of each. He knew the maintenance schedules of the dome's atmospheric systems and the names of the three engineers who ran them.</p>
-
-  <p class="reveal">He did not know why he knew these things. He had simply learned them, the way you learn the shape of a room you've lived in for years — not because you studied it, but because it was always there.</p>
-
-  <div class="scene-break reveal">— ◇ —</div>
-
-  <p class="reveal">The people of the city were kind. They were always kind — uniformly, reliably, in a way that Soren had noticed years ago and filed away as something to think about later. They smiled when he passed. They asked after his father with a warmth that seemed genuine and yet never varied. Their conversations had a quality of smoothness, like water moving over stone that had been worn to the right shape — nothing catching, nothing surprising, everything flowing in the direction it was meant to flow.</p>
-
-  <p class="reveal">Once, when Soren was fourteen, he had gotten into an argument with a boy his own age over something he couldn't remember now. The boy had gotten upset — had raised his voice, gone red-faced, said something sharp. And then, almost immediately, he had stopped. Not calmed down gradually. Stopped. As if a switch had been adjusted somewhere inside him. He had apologized in a voice that was perfectly modulated and then walked away, and the expression on his face as he left was the expression of someone who has forgotten what they were feeling.</p>
-
-  <p class="reveal">Soren had thought about that moment many times since. He had never started an argument with anyone in the city again.</p>
-
+<section class="ns" data-ambient="dome" data-sky="night">
+<p class="reveal">The sky changed color at seven in the morning. It happened every day — a slow bleed from deep violet into pale amber, the light arriving not from any horizon but from everywhere at once, as if the air itself had decided to glow. Soren Kai had watched it happen ten thousand times and still, some mornings, he stood at his window long enough to miss breakfast.</p>
+<p class="reveal">The city stretched below him in all directions. Towers of pale stone and glass, bridges arching between platforms at impossible heights, walkways draped in flowering vines that bloomed in colors with no name in any language Soren had been taught. The dome curved above all of it — a transparent shell so vast you could forget it was there. You had to look for the seam. And if you were smart, you stopped looking.</p>
+<p class="reveal">Soren was seventeen. He had a quiet face and a habit of standing too long at windows. His father Elton Mori ran the city. He had built the city. He had raised Soren inside it with the quiet efficiency of someone maintaining important infrastructure — meals appearing, tutors scheduled, rooms kept at the right temperature — but never quite with the warmth those things implied.</p>
+<p class="reveal">His days followed a reliable shape. Morning lessons in systems theory and environmental mathematics. Afternoons free to move through the city, which Soren did alone, walking routes he had memorized over years of solitary wandering. He knew every bridge, every market tier, every garden level where the engineered flowers bloomed in scheduled rotations.</p>
+<div class="sb reveal">— ◇ —</div>
+<p class="reveal">The people of the city were kind. They were always kind — uniformly, reliably, in a way that Soren had noticed years ago and filed away as something to think about later. They smiled when he passed. Their conversations had a quality of smoothness, like water moving over stone that had been worn to the right shape — nothing catching, nothing surprising, everything flowing in the direction it was meant to flow.</p>
+<p class="reveal">Once, when Soren was fourteen, he had gotten into an argument with a boy his own age. The boy had gotten upset — had raised his voice, gone red-faced, said something sharp. And then, almost immediately, he had stopped. Not calmed down gradually. Stopped. As if a switch had been adjusted somewhere inside him. He had apologized in a voice that was perfectly modulated and then walked away, and the expression on his face as he left was the expression of someone who has forgotten what they were feeling.</p>
+<p class="reveal">Soren had thought about that moment many times since. He had never started an argument with anyone in the city again.</p>
 </section>
 
-<!-- ===================== CHAPTER TWO ===================== -->
-<div class="chapter-divider reveal">
-  <div class="chapter-label">Chapter Two</div>
-  <div class="chapter-title">Lockdown</div>
-  <div class="chapter-ornament"><span>&#9670;</span></div>
+<!-- CHAPTER TWO -->
+<div class="ch-div reveal" data-ambient="lockdown" data-sky="rednight">
+  <div class="ch-label">Chapter Two</div><div class="ch-title">Lockdown</div>
+  <div class="ch-orn"><span>◇</span></div>
 </div>
-
-<section class="novel-section">
-
-  <p class="reveal">The morning of the lockdown began like any other morning. Soren ate alone at the long table in the residence hall, watching the engineered sparrows land on the garden below his window. A tutor named Dace came at eight and taught systems theory — resource cycles, atmospheric pressure calculations, the mathematics of contained environments. The lesson had always felt strangely personal to Soren, as if someone had chosen it specifically for him. He had never asked why.</p>
-
-  <p class="reveal">At eleven, the city's tone shifted.</p>
-
-  <p class="reveal">He felt it before he heard it. A pressure change somewhere deep in the dome's infrastructure — something in the air growing heavier, more deliberate. Then the alarm sounded. Not the rising civic tone that announced an administrative message. Something lower. Slower. A sound that climbed up through the floor and into the bones before it reached the ears.</p>
-
-  <p class="reveal">Soren crossed to the window. Below, the bridges were emptying. People moved in the organized way that only happens when movement is not a choice. The lights along the walkways shifted from amber to a deep, steady red — not blinking, not urgent. Just red. Certain. Decided.</p>
-
-  <p class="reveal">The announcement came through the speakers seventeen minutes later. A city administrator's voice, carefully neutral, reading from a prepared statement. Emergency protocols were being implemented. Citizens were to remain indoors. Director Mori had not been heard from since early that morning. Investigations were underway.</p>
-
-  <p class="reveal"><em>Director Mori had not been heard from.</em></p>
-
-  <p class="reveal">Soren read the sentence three times in his mind, the way you repeat a word until it stops meaning anything. It did not work. He was out the door before the announcement had finished playing.</p>
-
-  <div class="scene-break reveal">— ◇ —</div>
-
-  <p class="reveal">The corridors were fuller than usual — people standing in doorways, in small clusters at intersections, speaking in low careful voices. Soren moved through them without stopping. He knew where his father's research facility was. He had never been permitted inside it.</p>
-
-  <p class="reveal">The bridge to the central tower was sealed. A gate had descended across the walkway — smooth, reinforced, no handle, no seam. He pressed his palm against it. The surface was warm, almost skin-temperature, and gave nothing.</p>
-
-  <p class="reveal">He stood there long enough for the red lights to cycle once. Then someone spoke.</p>
-
-  <p class="reveal">"That gate has been closed since this morning."</p>
-
-  <p class="reveal">The voice came from the right. Soren turned.</p>
-
-  <p class="reveal">She was standing at the bridge's edge, at the gap in the railing where the walkway opened to open air above the lower city. He could not have said how old she was — she looked his age, but she held herself with the stillness of something much older. Her outline was faintly luminous, her edges softly threaded with light that was not quite reflection and not quite shadow. She wore no dome-issue clothing. She wore something pale and almost formless that moved slightly even when the air did not.</p>
-
-  <p class="reveal">She was looking at him as though she had been waiting for exactly this moment, in exactly this place, for a very long time.</p>
-
-  <p class="reveal">"You're Soren Kai," she said. Not a question.</p>
-
-  <p class="reveal">He did not answer immediately. In the dome, everyone knew who he was — the Director's son. But she said his name differently. Not with deference or wariness. With something closer to recognition. As if she were confirming something she had studied from a distance.</p>
-
-  <p class="reveal">"Who are you?"</p>
-
-  <p class="reveal">She tilted her head. The light at her edges shifted.</p>
-
-  <p class="reveal">"That's a complicated question. But I know where your father is. Or at least — I know the direction."</p>
-
-  <p class="reveal">She turned toward the open edge of the bridge and looked out over the city. Below, the lower tiers were quiet under red light.</p>
-
-  <p class="reveal">"The gate isn't the only way across."</p>
-
+<section class="ns" data-ambient="lockdown" data-sky="rednight">
+<p class="reveal">The morning of the lockdown began like any other morning. Soren ate alone at the long table in the residence hall, watching the engineered sparrows land on the garden below his window. At eleven, the city's tone shifted.</p>
+<p class="reveal">He felt it before he heard it. A pressure change somewhere deep in the dome's infrastructure — something in the air growing heavier, more deliberate. Then the alarm sounded. Not the rising civic tone that announced an administrative message. Something lower. Slower. A sound that climbed up through the floor and into the bones before it reached the ears.</p>
+<p class="reveal">The announcement came through the speakers seventeen minutes later. Emergency protocols were being implemented. Citizens were to remain indoors. Director Mori had not been heard from since early that morning.</p>
+<p class="reveal"><em>Director Mori had not been heard from.</em></p>
+<p class="reveal">Soren read the sentence three times in his mind, the way you repeat a word until it stops meaning anything. It did not work. He was out the door before the announcement had finished playing.</p>
+<div class="sb reveal">— ◇ —</div>
+<p class="reveal">The bridge to the central tower was sealed. A gate had descended across the walkway — smooth, reinforced, no handle, no seam. He pressed his palm against it. The surface was warm, almost skin-temperature, and gave nothing.</p>
+<p class="reveal">He stood there long enough for the red lights to cycle once. Then someone spoke.</p>
+<p class="reveal">"That gate has been closed since this morning."</p>
+<p class="reveal">The voice came from the right. Soren turned.</p>
+<p class="reveal">She was standing at the bridge's edge. He could not have said how old she was — she looked his age, but she held herself with the stillness of something much older. Her outline was faintly luminous, her edges softly threaded with light that was not quite reflection and not quite shadow.</p>
+<p class="reveal">She was looking at him as though she had been waiting for exactly this moment, in exactly this place, for a very long time.</p>
+<p class="reveal">"You're Soren Kai," she said. Not a question.</p>
+<p class="reveal">"Who are you?"</p>
+<p class="reveal">She tilted her head. The light at her edges shifted.</p>
+<p class="reveal">"That's a complicated question. But I know where your father is. Or at least — I know the direction."</p>
+<p class="reveal">She turned toward the open edge of the bridge and looked out over the city. Below, the lower tiers were quiet under red light.</p>
+<p class="reveal">"The gate isn't the only way across."</p>
 </section>
 
-<!-- ===================== CHAPTER THREE ===================== -->
-<div class="chapter-divider reveal">
-  <div class="chapter-label">Chapter Three</div>
-  <div class="chapter-title">Lumi</div>
-  <div class="chapter-ornament"><span>&#9670;</span></div>
+<!-- CHAPTER THREE -->
+<div class="ch-div reveal" data-ambient="lumi" data-sky="lumisky">
+  <div class="ch-label">Chapter Three</div><div class="ch-title">Lumi</div>
+  <div class="ch-orn"><span>◇</span></div>
 </div>
-
-<section class="novel-section">
-
-  <p class="reveal">He followed her because there was nothing else to follow. She moved through the city in ways that should not have been possible — not running, not hiding, simply existing in the spaces between observation. She stepped through the edge of a security beam without it reacting and did not comment on this. He did not ask.</p>
-
-  <p class="reveal">They reached the outer ring of the research sector by a route that took them along the underside of the city's infrastructure — maintenance corridors Soren had not known existed, following pipes and conduits that carried the dome's circulatory systems: water, power, recycled air. The sounds here were different. The dome breathed here, at its seams, in a way it did not breathe anywhere you could see.</p>
-
-  <p class="reveal">At the end of one corridor, a viewport looked out into something Soren had not expected. Not the interior of the dome. Not the city.</p>
-
-  <p class="reveal">The outside.</p>
-
-  <p class="reveal">He pressed his face close to the glass and looked at a world he had no language for. The ground outside was pale — almost white in some places, burnt orange in others, the colors of things that had been exposed to more sun than they could hold. There were shapes in the distance that might have been buildings once, their silhouettes irregular and lowered, as if the earth had slowly accepted them. Dust moved in long flat currents across everything. The sky above was real — a blue that was nothing like the dome's manufactured blue, deeper and slightly harsher, crossed with clouds that had never been engineered to look beautiful.</p>
-
-  <p class="reveal">He stood at the viewport for a long time.</p>
-
-  <p class="reveal">"It's real," he said finally.</p>
-
-  <p class="reveal">"Yes."</p>
-
-  <p class="reveal">"There's a world out there."</p>
-
-  <p class="reveal">"There always has been."</p>
-
-  <p class="reveal">He turned from the viewport. The corridor felt narrower, the hum of the dome's machinery louder, as if his understanding of the space had changed the space itself.</p>
-
-  <p class="reveal">"Why didn't anyone—"</p>
-
-  <p class="reveal">"Because the city was built not to show you. That wasn't a mistake. It was a decision."</p>
-
-  <p class="reveal">He studied her. In the dim maintenance light her luminosity was more obvious — a quiet, sourceless glow, as if she were lit from within by something small and steady.</p>
-
-  <p class="reveal">"What are you?"</p>
-
-  <p class="reveal">She was quiet for a moment. Not evasive — considering.</p>
-
-  <p class="reveal">"Your father made me. He built me to watch over you and guide you and make sure you turned out the way he needed you to. That's what I am, technically. That's my function." She paused. "But I've been watching you for a long time now. And I've come to think that what a thing is built to be and what it actually becomes are not always the same thing."</p>
-
-  <p class="reveal">She looked at the viewport. At the world outside. Then back at him.</p>
-
-  <p class="reveal">"My name is Lumi. And I think you need to see what's on the other side of that glass. I think you need to understand what your father built this city to protect you from — and what he built you to be."</p>
-
-  <div class="scene-break reveal">— ◇ —</div>
-
-  <p class="reveal">She told him to rest before they went further. He could not imagine resting. He sat on the floor of the maintenance corridor with his back against the curved wall, and she sat nearby in her quiet luminous way, and for a while neither of them spoke.</p>
-
-  <p class="reveal">He thought about the sparrows outside his window. The engineered ones. He had always assumed they were the only kind of sparrow that existed.</p>
-
-  <p class="reveal">"Lumi."</p>
-
-  <p class="reveal">"Yes."</p>
-
-  <p class="reveal">"How long have you been watching me?"</p>
-
-  <p class="reveal">She thought about this with what seemed like genuine care. "Since the beginning."</p>
-
-  <p class="reveal">"And is my father alright?"</p>
-
-  <p class="reveal">She looked at the floor, at some point between them — the expression she wore when the truth was more complicated than the question asking for it.</p>
-
-  <p class="reveal">"Your father is doing what he has always done," she said at last. "He is trying to hold something together that cannot be held. And he is doing it alone, because he has always believed that is the only way."</p>
-
-  <p class="reveal">She looked up. Something in her expression was careful and precise and, beneath both of those things, something that looked unexpectedly like grief.</p>
-
-  <p class="reveal">"That is the thing about your father that has never changed. He builds everything by himself. He has never once considered that the thing he's trying to rebuild might only come back if he lets someone else carry part of it."</p>
-
-  <p class="reveal">The dome breathed. The viewport glowed faintly with real sky. The red lights held their color, patient and certain, waiting for something to resolve.</p>
-
+<section class="ns" data-ambient="lumi" data-sky="lumisky">
+<p class="reveal">He followed her because there was nothing else to follow. She moved through the city in ways that should not have been possible — not running, not hiding, simply existing in the spaces between observation.</p>
+<p class="reveal">At the end of one corridor, a viewport looked out into something Soren had not expected. Not the interior of the dome. Not the city. The outside.</p>
+<p class="reveal">He pressed his face close to the glass and looked at a world he had no language for. The ground outside was pale — almost white in some places, burnt orange in others. The sky above was real — a blue that was nothing like the dome's manufactured blue, deeper and slightly harsher, crossed with clouds that had never been engineered to look beautiful.</p>
+<p class="reveal">He stood at the viewport for a long time.</p>
+<p class="reveal">"It's real," he said finally.</p>
+<p class="reveal">"Yes."</p>
+<p class="reveal">"There's a world out there."</p>
+<p class="reveal">"There always has been."</p>
+<div class="sb reveal">— ◇ —</div>
+<p class="reveal">He studied her. In the dim maintenance light her luminosity was more obvious — a quiet, sourceless glow, as if she were lit from within by something small and steady.</p>
+<p class="reveal">"What are you?"</p>
+<p class="reveal">She was quiet for a moment. Not evasive — considering.</p>
+<p class="reveal">"Your father made me. He built me to watch over you and guide you and make sure you turned out the way he needed you to. That's what I am, technically. That's my function." She paused. "But I've been watching you for a long time now. And I've come to think that what a thing is built to be and what it actually becomes are not always the same thing."</p>
+<p class="reveal">"My name is Lumi. And I think you need to see what's on the other side of that glass."</p>
+<div class="sb reveal">— ◇ —</div>
+<p class="reveal">"Lumi."</p>
+<p class="reveal">"Yes."</p>
+<p class="reveal">"How long have you been watching me?"</p>
+<p class="reveal">She thought about this with what seemed like genuine care. "Since the beginning."</p>
+<p class="reveal">"Your father is doing what he has always done," she said at last. "He is trying to hold something together that cannot be held. And he is doing it alone, because he has always believed that is the only way."</p>
+<p class="reveal">The dome breathed. The viewport glowed faintly with real sky. The red lights held their color, patient and certain, waiting for something to resolve.</p>
 </section>
 
-<!-- ===================== CHAPTER FOUR ===================== -->
-<div class="chapter-divider reveal">
-  <div class="chapter-label">Chapter Four</div>
-  <div class="chapter-title">The Other Side</div>
-  <div class="chapter-ornament"><span>&#9670;</span></div>
+<!-- CHAPTER FOUR -->
+<div class="ch-div reveal" data-ambient="outside" data-sky="harshday">
+  <div class="ch-label">Chapter Four</div><div class="ch-title">The Other Side</div>
+  <div class="ch-orn"><span>◇</span></div>
 </div>
-
-<section class="novel-section">
-
-  <p class="reveal">They left through a maintenance exit at the dome's base — a panel in the outer wall that opened outward on a hydraulic hinge, clearly designed to be used and just as clearly never expected to be used by anyone living inside. Soren ducked through it behind Lumi and straightened up on the other side and stood very still.</p>
-
-  <p class="reveal">The air hit him first. Not bad air — just different air. Air that had been outside, that had moved across open distance before arriving here, that carried with it the smell of dust and dry earth and something faintly metallic. After seventeen years of breathing recycled dome atmosphere, it felt like drinking from a different source. His lungs adjusted slowly, taking inventory.</p>
-
-  <p class="reveal">Then he looked up.</p>
-
-  <p class="reveal">The sky was enormous. He had not understood, from behind the viewport, how enormous it actually was — how it did not stop at any point he could see, how it continued past the edge of everything he knew and kept going. The dome's sky had always curved back toward itself. This sky did not. It simply went. He stood beneath it and felt very small and strangely grateful.</p>
-
-  <p class="reveal">"The first time is always difficult," Lumi said beside him.</p>
-
-  <p class="reveal">"I'm not finding it difficult."</p>
-
-  <p class="reveal">"I know. That's what I meant."</p>
-
-  <div class="scene-break reveal">— ◇ —</div>
-
-  <p class="reveal">The dome sat on a wide elevated platform at the island's center. The land sloped away from it in all directions, the slope gentle at first and then steeper as it descended toward what had once been the island's coastline. Soren could see the water from where he stood — real water, dark and wide, moving under the real sky with a heaviness that the dome's decorative fountains had never come close to suggesting.</p>
-
-  <p class="reveal">Between the dome's platform and the coast was the island's outer ring — and here the world revealed what it had become. The structures were ruins now, but you could still read what they had been. Residential buildings, their facades stripped to bone by years of weather. A road system, cracked and grown through with pale vegetation that had decided the concrete was close enough to soil. The skeleton of what might have been a hospital — its red-cross symbol still visible in faded paint on one surviving wall, the color of it the same as the ANINO Labs red that Soren had seen in old archive files, though he did not know this yet.</p>
-
-  <p class="reveal">Everything was the color of something that had given up trying to be a color.</p>
-
-  <p class="reveal">"People lived here," he said.</p>
-
-  <p class="reveal">"People lived everywhere," Lumi said. "Before."</p>
-
-  <p class="reveal">"Before what?"</p>
-
-  <p class="reveal">She looked at the ruins. At the faded hospital wall. At the road going nowhere.</p>
-
-  <p class="reveal">"Before everything that your father knows and has never told you."</p>
-
+<section class="ns" data-ambient="outside" data-sky="harshday">
+<p class="reveal">They left through a maintenance exit at the dome's base. Soren ducked through it behind Lumi and straightened up on the other side and stood very still.</p>
+<p class="reveal">The air hit him first. Not bad air — just different air. Air that had been outside, that had moved across open distance before arriving here, that carried with it the smell of dust and dry earth and something faintly metallic. After seventeen years of breathing recycled dome atmosphere, it felt like drinking from a different source.</p>
+<p class="reveal">Then he looked up.</p>
+<p class="reveal">The sky was enormous. He had not understood, from behind the viewport, how enormous it actually was — how it did not stop at any point he could see, how it continued past the edge of everything he knew and kept going. The dome's sky had always curved back toward itself. This sky did not. It simply went.</p>
+<p class="reveal">"The first time is always difficult," Lumi said beside him.</p>
+<p class="reveal">"I'm not finding it difficult."</p>
+<p class="reveal">"I know. That's what I meant."</p>
+<div class="sb reveal">— ◇ —</div>
+<p class="reveal">Between the dome's platform and the coast was the island's outer ring — and here the world revealed what it had become. Residential buildings, their facades stripped to bone by years of weather. A road system, cracked and grown through with pale vegetation.</p>
+<p class="reveal">"People lived here," he said.</p>
+<p class="reveal">"People lived everywhere," Lumi said. "Before."</p>
+<p class="reveal">"Before what?"</p>
+<p class="reveal">"Before everything that your father knows and has never told you."</p>
 </section>
 
-<!-- ===================== CHAPTER FIVE ===================== -->
-<div class="chapter-divider reveal">
-  <div class="chapter-label">Chapter Five</div>
-  <div class="chapter-title">The Wasteland</div>
-  <div class="chapter-ornament"><span>&#9670;</span></div>
+<!-- CHAPTER FIVE -->
+<div class="ch-div reveal" data-ambient="outside" data-sky="harshday">
+  <div class="ch-label">Chapter Five</div><div class="ch-title">The Wasteland</div>
+  <div class="ch-orn"><span>◇</span></div>
 </div>
-
-<section class="novel-section">
-
-  <p class="reveal">They walked for two hours through the outer ring before Soren understood that the ruins were not just ruins. They were records. Every collapsed building told a version of the same story if you knew how to read it — and Soren, who had spent his entire life learning systems and structures without knowing why, found that he knew exactly how to read it.</p>
-
-  <p class="reveal">The damage patterns were not random. The lower floors of most structures had been reinforced — hastily, using materials that did not match the original construction, sealed with a kind of urgency that suggested the work had been done under pressure. The upper floors had collapsed inward, which meant the damage had come from above. Military-grade, Soren thought, and did not know how he knew that either.</p>
-
-  <p class="reveal">"What happened here?" he asked.</p>
-
-  <p class="reveal">"A war," Lumi said. "Several, in sequence. The first one was biological — something that the organizations running the world had been developing for decades finally escaped containment. That was before your father's time, mostly. The second war was fought with soldiers and machines. The third one wasn't really a war — it was a decision. Made by people who had already decided the world wasn't worth keeping."</p>
-
-  <p class="reveal">Soren stopped walking. "Someone decided to end the world?"</p>
-
-  <p class="reveal">"Someone decided to end <em>this</em> world. And start somewhere else." She looked up at the empty sky. "They had been planning it for years. The organizations — ORDEN, at the top. TRIAS Corp beneath them, operating in Asia, in Europe, in Japan first and then everywhere. They funded the research, ran the experiments, built the systems. They believed humanity was a project that had failed. So they evacuated the people they considered worth keeping — and they cleaned the rest."</p>
-
-  <p class="reveal">The word <em>cleaned</em> sat in the air between them like something with weight.</p>
-
-  <p class="reveal">"Your father knew about them," Lumi continued. "He worked inside their systems for years. He did not want to. But men like Elton Mori are useful to organizations like TRIAS Corp, and organizations like TRIAS Corp are very good at making sure useful men stay useful."</p>
-
-  <div class="scene-break reveal">— ◇ —</div>
-
-  <p class="reveal">They rested at the edge of a collapsed overpass. Below it, a dried riverbed stretched east, its banks still lined with the ghost shapes of trees — gray trunks, no leaves, standing in the arrangement of something that had been a forest once and now was only its own memory.</p>
-
-  <p class="reveal">Soren sat with his back against a concrete support column and looked at the dead trees and thought about the city behind the dome. The way the lights came on every morning at exactly seven. The way the citizens smiled with that reliable, undifferentiated warmth. The way the argument had stopped mid-sentence three years ago, a boy's anger switched off like a light.</p>
-
-  <p class="reveal">"The people in the dome," he said slowly. "They're not— they're not like me, are they."</p>
-
-  <p class="reveal">Lumi looked at him. Something shifted in her expression — not surprise, but acknowledgment. The recognition of a question she had been waiting for.</p>
-
-  <p class="reveal">"No," she said. "They're not."</p>
-
-  <p class="reveal">"What are they?"</p>
-
-  <p class="reveal">She was quiet for a long moment. The dead trees stood in their rows. The dry riverbed held nothing.</p>
-
-  <p class="reveal">"Your father's answer to an impossible problem," she said finally. "I'll let him explain it. He owes you that much."</p>
-
+<section class="ns" data-ambient="outside" data-sky="harshday">
+<p class="reveal">They walked for two hours through the outer ring before Soren understood that the ruins were not just ruins. They were records.</p>
+<p class="reveal">"What happened here?" he asked.</p>
+<p class="reveal">"A war," Lumi said. "Several, in sequence. The first one was biological — something that the organizations running the world had been developing for decades finally escaped containment. The second war was fought with soldiers and machines. The third one wasn't really a war — it was a decision. Made by people who had already decided the world wasn't worth keeping."</p>
+<p class="reveal">Soren stopped walking. "Someone decided to end the world?"</p>
+<p class="reveal">"Someone decided to end <em>this</em> world. And start somewhere else." She looked up at the empty sky. "ORDEN at the top. TRIAS Corp beneath them. They believed humanity was a project that had failed. So they evacuated the people they considered worth keeping — and they cleaned the rest."</p>
+<div class="sb reveal">— ◇ —</div>
+<p class="reveal">They rested at the edge of a collapsed overpass. Below it, a dried riverbed stretched east, its banks still lined with the ghost shapes of trees — gray trunks, no leaves, standing in the arrangement of something that had been a forest once and now was only its own memory.</p>
+<p class="reveal">"The people in the dome," he said slowly. "They're not — they're not like me, are they."</p>
+<p class="reveal">"No," she said. "They're not."</p>
+<p class="reveal">"Your father's answer to an impossible problem," she said finally. "I'll let him explain it. He owes you that much."</p>
 </section>
 
-<!-- ===================== CHAPTER SIX ===================== -->
-<div class="chapter-divider reveal">
-  <div class="chapter-label">Chapter Six</div>
-  <div class="chapter-title">The Survivors</div>
-  <div class="chapter-ornament"><span>&#9670;</span></div>
+<!-- CHAPTER SIX -->
+<div class="ch-div reveal" data-ambient="survivors" data-sky="dusk">
+  <div class="ch-label">Chapter Six</div><div class="ch-title">The Survivors</div>
+  <div class="ch-orn"><span>◇</span></div>
 </div>
-
-<section class="novel-section">
-
-  <p class="reveal">They found the camp at the island's southern edge, sheltered in the ruins of what had once been a fishing settlement — a cluster of modified structures, half original and half improvised, built out of salvaged materials with the practical ingenuity of people who had been building with whatever existed for a very long time. Smoke rose from two separate fires. Between the structures, figures moved with the economy of motion that belongs to people whose lives do not allow for wasted energy.</p>
-
-  <p class="reveal">Lumi stopped at the edge of the camp's perimeter, and Soren stopped with her.</p>
-
-  <p class="reveal">"They know about the dome," she said quietly. "They've lived in its shadow for years. They've watched it from out here. They know things about it that you don't."</p>
-
-  <p class="reveal">"Do they know about me?"</p>
-
-  <p class="reveal">She did not answer immediately. "Yes," she said.</p>
-
-  <p class="reveal">A woman emerged from the nearest structure before Soren could ask anything else. She was perhaps fifty, with a face that had been shaped by weather and decisions, and she stopped when she saw Soren and went very still.</p>
-
-  <p class="reveal">Not the kind of still that comes from fear. The kind that comes from recognition.</p>
-
-  <p class="reveal">"Which one?" she asked. Her voice was steady, directed at Lumi, but her eyes did not leave Soren's face.</p>
-
-  <p class="reveal">"The seventh," Lumi said.</p>
-
-  <p class="reveal">The woman looked at Soren for a long moment — taking inventory the way he had taken inventory of the air, carefully, without obvious emotion. Then she stepped aside and gestured for them to enter.</p>
-
-  <p class="reveal">"The seventh one we've seen come out," she said. "Come inside."</p>
-
-  <div class="scene-break reveal">— ◇ —</div>
-
-  <p class="reveal">Her name was Vera. She had been born in one of the outer settlements and had lived her entire life within sight of the dome — a child who grew up watching the dome's glow on the horizon the way other generations had watched stars, with equal parts wonder and unease.</p>
-
-  <p class="reveal">She told Soren about the others while they ate — real food, cooked over real fire, tasting of smoke and salt and effort. Six others had come out before him over the years. Some had stayed with the camp for a while. Some had gone back in. One had walked east into the deeper wasteland and never returned.</p>
-
-  <p class="reveal">"They all had your face," Vera said. "Near enough. The same jaw. The same way of holding still when they were thinking." She looked at him across the fire. "We used to argue about what it meant — whether the dome was trying to find something, or recreate something, or fix something. We never agreed."</p>
-
-  <p class="reveal">"What do you think now?" Soren asked.</p>
-
-  <p class="reveal">Vera was quiet for a moment, looking at the fire.</p>
-
-  <p class="reveal">"I think someone inside that dome lost something a very long time ago," she said. "And I think everything inside that dome — every light, every building, every person — is one long attempt to get it back."</p>
-
-  <p class="reveal">Soren did not respond. Across the fire, Lumi was watching him with that expression — the careful, precise one, with something underneath it that he was only now beginning to identify correctly.</p>
-
-  <p class="reveal">It was not grief. It was love. The quiet, patient kind that has given up expecting to be named.</p>
-
+<section class="ns" data-ambient="survivors" data-sky="dusk">
+<p class="reveal">They found the camp at the island's southern edge, sheltered in the ruins of what had once been a fishing settlement. Smoke rose from two separate fires. Between the structures, figures moved with the economy of motion that belongs to people whose lives do not allow for wasted energy.</p>
+<p class="reveal">A woman emerged from the nearest structure before Soren could ask anything else. She was perhaps fifty, with a face that had been shaped by weather and decisions, and she stopped when she saw Soren and went very still. Not the kind of still that comes from fear. The kind that comes from recognition.</p>
+<p class="reveal">"Which one?" she asked. Her voice was steady, directed at Lumi, but her eyes did not leave Soren's face.</p>
+<p class="reveal">"The seventh," Lumi said.</p>
+<p class="reveal">"The seventh one we've seen come out. Come inside."</p>
+<div class="sb reveal">— ◇ —</div>
+<p class="reveal">Her name was Vera. She told Soren about the others while they ate — real food, cooked over real fire, tasting of smoke and salt and effort. Six others had come out before him over the years. Some had stayed. Some had gone back in. One had walked east into the deeper wasteland and never returned.</p>
+<p class="reveal">"They all had your face," Vera said. "Near enough. The same jaw. The same way of holding still when they were thinking." She looked at him across the fire. "I think someone inside that dome lost something a very long time ago. And I think everything inside that dome — every light, every building, every person — is one long attempt to get it back."</p>
+<p class="reveal">Soren did not respond. Across the fire, Lumi was watching him with that expression — the careful, precise one, with something underneath it that he was only now beginning to identify correctly.</p>
+<p class="reveal">It was not grief. It was love. The quiet, patient kind that has given up expecting to be named.</p>
 </section>
 
-<!-- ===================== CHAPTER SEVEN ===================== -->
-<div class="chapter-divider reveal">
-  <div class="chapter-label">Chapter Seven</div>
-  <div class="chapter-title">Cracks</div>
-  <div class="chapter-ornament"><span>&#9670;</span></div>
+<!-- CHAPTER SEVEN -->
+<div class="ch-div reveal" data-ambient="dome" data-sky="night">
+  <div class="ch-label">Chapter Seven</div><div class="ch-title">Cracks</div>
+  <div class="ch-orn"><span>◇</span></div>
 </div>
-
-<section class="novel-section">
-
-  <p class="reveal">They returned to the dome the following morning. Soren needed to. He did not know yet exactly what he was looking for inside it, but he knew he had to go back and look at it differently — with the outside world in his eyes now, with Vera's words still sitting heavy in his chest. He needed to see it for what it was rather than for what he had been raised to see.</p>
-
-  <p class="reveal">The maintenance entrance opened from outside with a code that Lumi provided without explanation. She had, Soren was beginning to understand, a great deal of knowledge about the dome's systems that she had been carrying quietly for a very long time, waiting for the moment when it would be useful to him.</p>
-
-  <p class="reveal">The city felt different from the inside now. Not changed — everything was exactly as he had left it, the amber lights cycling on schedule, the citizens moving through their days with their smooth, reliable warmth. But Soren moved through it differently, watching instead of living in it, noticing the things he had always noticed and had never properly questioned.</p>
-
-  <p class="reveal">A woman in the market district laughed at something her companion said — a bright, full laugh, genuine-seeming. And then her companion said something else, and she laughed again in exactly the same way. Not a similar laugh. The same laugh. The same duration, the same pitch, the same tilt of the head.</p>
-
-  <p class="reveal">Soren stopped walking.</p>
-
-  <p class="reveal">He stood in the middle of the market corridor and watched the two women move away, talking easily, and he thought about the argument that had stopped mid-sentence three years ago, and about the engineered sparrows, and about Vera's fire, and about the way Lumi had said <em>which one</em> — as a question with a number for an answer.</p>
-
-  <p class="reveal">He thought about the morning lessons in atmospheric mathematics. The systems theory. The closed-environment resource cycles. The education designed not for a general student but for someone specific.</p>
-
-  <p class="reveal">He thought: <em>built to survive. Built to run this. Built to inherit it.</em></p>
-
-  <p class="reveal">"Lumi," he said quietly. She was beside him — she was always beside him now, he was realizing, had always been, invisible before he had known to look.</p>
-
-  <p class="reveal">"Yes."</p>
-
-  <p class="reveal">"I want to see my father's facility."</p>
-
-  <p class="reveal">A pause. "That will require getting past the lockdown seals."</p>
-
-  <p class="reveal">"I know. Can you do it?"</p>
-
-  <p class="reveal">Another pause. Longer.</p>
-
-  <p class="reveal">"Yes," she said. "But Soren — what you find there. I want you to be ready."</p>
-
-  <p class="reveal">"I'm not ready," he said. "But I don't think waiting will fix that."</p>
-
+<section class="ns" data-ambient="dome" data-sky="night">
+<p class="reveal">They returned to the dome the following morning. The city felt different from the inside now. Not changed — everything was exactly as he had left it. But Soren moved through it differently, watching instead of living in it.</p>
+<p class="reveal">A woman in the market district laughed at something her companion said — a bright, full laugh, genuine-seeming. And then her companion said something else, and she laughed again in exactly the same way. Not a similar laugh. The same laugh. The same duration, the same pitch, the same tilt of the head.</p>
+<p class="reveal">Soren stopped walking.</p>
+<p class="reveal">He thought: <em>built to survive. Built to run this. Built to inherit it.</em></p>
+<p class="reveal">"Lumi," he said quietly. "I want to see my father's facility."</p>
+<p class="reveal">"Yes," she said. "But Soren — what you find there. I want you to be ready."</p>
+<p class="reveal">"I'm not ready," he said. "But I don't think waiting will fix that."</p>
 </section>
 
-<!-- ===================== CHAPTER EIGHT ===================== -->
-<div class="chapter-divider reveal">
-  <div class="chapter-label">Chapter Eight</div>
-  <div class="chapter-title">Artificial</div>
-  <div class="chapter-ornament"><span>&#9670;</span></div>
+<!-- CHAPTER EIGHT -->
+<div class="ch-div reveal" data-ambient="artificial" data-sky="coldnight">
+  <div class="ch-label">Chapter Eight</div><div class="ch-title">Artificial</div>
+  <div class="ch-orn"><span>◇</span></div>
 </div>
-
-<section class="novel-section">
-
-  <p class="reveal">The facility occupied the dome's innermost tier — a structure Soren had always seen from the outside and understood as his father's place of work, the administrative and research center of the city's operations. From the outside it looked institutional: clean lines, no ornamentation, the architecture of function rather than beauty. From the inside it was something else entirely.</p>
-
-  <p class="reveal">The lower levels were what you would expect — offices, conference rooms, server infrastructure. Lumi moved him through them quickly, bypassing security systems with a fluency that suggested she had done this before, or had been designed to be able to. They descended to a level below the official building plans.</p>
-
-  <p class="reveal">The laboratory extended for a distance that should not have been possible given the building's footprint above. It was organized around a central atrium — a tall open space with walkways at multiple levels, lined with workstations and sealed chambers and equipment whose purpose Soren could only partially read. At the atrium's center, a column of pale light extended from floor to ceiling, emanating from a mechanism he did not recognize.</p>
-
-  <p class="reveal">And along the walls of the lower level, in sealed transparent chambers, were people.</p>
-
-  <p class="reveal">Or things that looked like people.</p>
-
-  <p class="reveal">They were suspended in clear fluid, eyes closed, completely still — adult figures, children, all ages, all in the same posture of perfect suspended peace. Their faces were extraordinarily detailed, their skin textures exact, their expressions carefully neutral. They looked, in every visible way, exactly like the citizens who moved through the dome's streets and markets and bridges every day.</p>
-
-  <p class="reveal">Soren stood at the edge of the atrium and looked at them for a very long time.</p>
-
-  <p class="reveal">"They're not dead," Lumi said quietly. "They're waiting. Your father calls them the Continuation — synthetic bodies built to carry forward what he couldn't preserve biologically. He designed them to feel enough to function. To interact authentically enough that the city feels inhabited. To maintain the civilization he built until—"</p>
-
-  <p class="reveal">"Until what?"</p>
-
-  <p class="reveal">She was quiet.</p>
-
-  <p class="reveal">"Until you were ready," she said. "Until whoever came out of the process whole enough and real enough to actually run it."</p>
-
-  <p class="reveal">Soren looked at the suspended figures. At the chamber nearest him — a woman who had his father's cheekbones and an expression of perfect, manufactured calm.</p>
-
-  <p class="reveal">"Is any of it real?" he said. His voice was very steady. He was proud of how steady it was.</p>
-
-  <p class="reveal">"The city is real," Lumi said. "The walls, the bridges, the sky — built with real materials and real labor. The plants are real. The water is real." She paused. "Most of the people are not."</p>
-
-  <p class="reveal">"Most," he said. "Not all."</p>
-
-  <p class="reveal">"No. Not all."</p>
-
-  <p class="reveal">He turned and looked at her. She met his gaze with the same steady, careful attention she always gave him — the quality of attention that he understood now was not a feature of her programming. Was not a feature of her function. Was something she had arrived at herself, over time, through a process that was different from how humans arrived at things but arrived at the same place.</p>
-
-  <p class="reveal">"Am I real?" he asked.</p>
-
-  <p class="reveal">She did not look away. "Yes," she said. "You are the most real thing in this city."</p>
-
-  <p class="reveal">"But I'm not— I'm not an original."</p>
-
-  <p class="reveal">"No," she said softly. "You're not."</p>
-
+<section class="ns" data-ambient="artificial" data-sky="coldnight">
+<p class="reveal">The facility occupied the dome's innermost tier. They descended to a level below the official building plans. The laboratory extended for a distance that should not have been possible given the building's footprint above.</p>
+<p class="reveal">And along the walls of the lower level, in sealed transparent chambers, were people. Or things that looked like people.</p>
+<p class="reveal">They were suspended in clear fluid, eyes closed, completely still — adult figures, children, all ages, all in the same posture of perfect suspended peace. They looked, in every visible way, exactly like the citizens who moved through the dome's streets every day.</p>
+<p class="reveal">Soren stood at the edge of the atrium and looked at them for a very long time.</p>
+<p class="reveal">"They're not dead," Lumi said quietly. "They're waiting. Your father calls them the Continuation — synthetic bodies built to carry forward what he couldn't preserve biologically. He designed them to feel enough to function. To maintain the civilization he built until you were ready."</p>
+<p class="reveal">"Is any of it real?" he said.</p>
+<p class="reveal">"The city is real," Lumi said. "The walls, the bridges, the sky — built with real materials and real labor. The plants are real. The water is real." She paused. "Most of the people are not."</p>
+<p class="reveal">"Am I real?" he asked.</p>
+<p class="reveal">She did not look away. "Yes," she said. "You are the most real thing in this city."</p>
+<p class="reveal">"But I'm not an original."</p>
+<p class="reveal">"No," she said softly. "You're not."</p>
 </section>
 
-<!-- ===================== CHAPTER NINE ===================== -->
-<div class="chapter-divider reveal">
-  <div class="chapter-label">Chapter Nine</div>
-  <div class="chapter-title">The Boy</div>
-  <div class="chapter-ornament"><span>&#9670;</span></div>
+<!-- CHAPTER NINE -->
+<div class="ch-div reveal" data-ambient="identity" data-sky="coldnight">
+  <div class="ch-label">Chapter Nine</div><div class="ch-title">The Boy</div>
+  <div class="ch-orn"><span>◇</span></div>
 </div>
-
-<section class="novel-section">
-
-  <p class="reveal">He found the photograph in his father's private office on the uppermost floor of the facility — a room that looked lived-in in a way the rest of the building did not. There were papers, actual paper papers, stacked in careful piles. A cup that had held coffee, dried and forgotten. A coat hung over the back of the chair as if its owner had stepped out for a moment seventeen years ago and simply never returned.</p>
-
-  <p class="reveal">And on the desk, in a plain frame, a photograph.</p>
-
-  <p class="reveal">A family. An island. Morning light. A terrace above the sea.</p>
-
-  <p class="reveal">A man who was unmistakably his father — younger, lighter in some quality that had nothing to do with his face, sitting at a table with a cup in his hand and a look of uncomplicated contentment that Soren had never seen on Elton Mori's face in his entire life.</p>
-
-  <p class="reveal">A woman beside him — dark-haired, laughing at something, her hand resting on the table near his. <em>Rei,</em> Soren thought, though no one had told him her name.</p>
-
-  <p class="reveal">And a boy. Nine or ten years old. Caught mid-movement, reaching for something on the table, his face turned slightly toward the camera with an expression of complete, unguarded life.</p>
-
-  <p class="reveal">Soren picked up the photograph. He held it close. He looked at the boy's face for a very long time.</p>
-
-  <p class="reveal">He put it down carefully and sat in his father's chair and stared at the wall.</p>
-
-  <div class="scene-break reveal">— ◇ —</div>
-
-  <p class="reveal">Lumi stood in the doorway. She had not come in. She was giving him the room.</p>
-
-  <p class="reveal">"His name was Kai," she said, when enough time had passed. "Kai Mori. He was nine years old when the island was destroyed. He had his mother's eyes and his father's habit of asking questions from angles no one else thought to approach from."</p>
-
-  <p class="reveal">Soren said nothing.</p>
-
-  <p class="reveal">"Your last name isn't coincidental," she continued. "Your father named you Soren Kai. He kept the name close. He always kept things close that he was afraid of losing again."</p>
-
-  <p class="reveal">"How many times did he try?" Soren asked. His voice was level. He had decided to keep it level.</p>
-
-  <p class="reveal">"Six before you. None of them survived to your age. The process — cloning with integrated memory frameworks, the emotional architecture — it took him years to stabilize. The previous six couldn't hold it. The memories conflicted with their own developing identity and—" She stopped. "You were the first one who held."</p>
-
-  <p class="reveal">"The survivors outside," Soren said. "They said <em>which one.</em>"</p>
-
-  <p class="reveal">"They've seen the others come out over the years. Some of them before the process failed. They knew what you were before you did."</p>
-
-  <p class="reveal">He looked at the photograph again. At the boy reaching for something on the table, alive and unaware and completely his own.</p>
-
-  <p class="reveal">"I'm not him," Soren said.</p>
-
-  <p class="reveal">"No," Lumi said. "You're not. You never were. Your father built you to be — but somewhere between the process and the living, you became someone he didn't design." She paused. "That's the part he's never known how to handle. The part that was genuinely, entirely yours."</p>
-
+<section class="ns" data-ambient="identity" data-sky="coldnight">
+<p class="reveal">He found the photograph in his father's private office — a room that looked lived-in in a way the rest of the building did not. A cup that had held coffee, dried and forgotten. A coat hung over the back of the chair as if its owner had stepped out for a moment seventeen years ago and simply never returned.</p>
+<p class="reveal">And on the desk, in a plain frame, a photograph.</p>
+<p class="reveal">A family. An island. Morning light. A terrace above the sea.</p>
+<p class="reveal">A man who was unmistakably his father — younger, lighter, sitting at a table with a cup in his hand and a look of uncomplicated contentment that Soren had never seen on Elton Mori's face in his entire life.</p>
+<p class="reveal">A woman beside him — dark-haired, laughing. <em>Rei,</em> Soren thought, though no one had told him her name.</p>
+<p class="reveal">And a boy. Nine or ten years old. Caught mid-movement, reaching for something on the table, his face turned slightly toward the camera with an expression of complete, unguarded life.</p>
+<p class="reveal">Soren picked up the photograph. He looked at the boy's face for a very long time. He put it down carefully and sat in his father's chair and stared at the wall.</p>
+<div class="sb reveal">— ◇ —</div>
+<p class="reveal">"His name was Kai," Lumi said. "Kai Mori. He was nine years old when the island was destroyed."</p>
+<p class="reveal">"How many times did he try?" Soren asked.</p>
+<p class="reveal">"Six before you. None of them survived to your age. You were the first one who held."</p>
+<p class="reveal">"I'm not him," Soren said.</p>
+<p class="reveal">"No," Lumi said. "You're not. You never were. Your father built you to be — but somewhere between the process and the living, you became someone he didn't design. That's the part that was genuinely, entirely yours."</p>
 </section>
 
-<!-- ===================== CHAPTER TEN ===================== -->
-<div class="chapter-divider reveal">
-  <div class="chapter-label">Chapter Ten</div>
-  <div class="chapter-title">Rei</div>
-  <div class="chapter-ornament"><span>&#9670;</span></div>
+<!-- CHAPTER TEN -->
+<div class="ch-div reveal" data-ambient="tender" data-sky="rosedusk">
+  <div class="ch-label">Chapter Ten</div><div class="ch-title">Rei</div>
+  <div class="ch-orn"><span>◇</span></div>
 </div>
-
-<section class="novel-section">
-
-  <p class="reveal">They sat together on the floor of his father's office — Soren with his back against the desk, Lumi a few feet away, both of them quiet in the particular way of people who have arrived at a place where words need to be chosen carefully or not at all. Outside the facility's high windows, the dome's amber sky had shifted toward evening — not real evening, not a real sun setting, just the city's lighting algorithm deciding it was time for a different color.</p>
-
-  <p class="reveal">"Tell me about her," Soren said.</p>
-
-  <p class="reveal">Lumi looked at him. "About Rei?"</p>
-
-  <p class="reveal">"Yes."</p>
-
-  <p class="reveal">A pause. Not reluctance — consideration. The gathering of something that had been stored for a long time in a place she rarely opened.</p>
-
-  <p class="reveal">"Your father built me partly from memory records," she said. "His memories. The ones he considered most important — the ones he kept returning to in the early years when he was still doing the work of trying to survive what had happened. There are pieces of her in how I was constructed. In how I see certain things. In what I recognize as worth paying attention to." She looked at her own hands — pale, luminous, slightly not-quite-physical. "I don't know if that makes me partly her, or just partly shaped by someone who loved her. I don't think the difference is clear."</p>
-
-  <p class="reveal">"What was she like?"</p>
-
-  <p class="reveal">"Patient," Lumi said. "Not passive — patient is different. She was interested in things. In people, in ideas, in the specific quality of how light moved across the water in the morning. She laughed easily. She argued carefully. She was the kind of person who made rooms feel like they had better air in them." A pause. "Your father was brilliant and difficult and frequently absent in the way that certain kinds of brilliant men are absent — present in body but miles away in their heads. She compensated for this without complaint and without resentment, which I think is one of the hardest things a person can do."</p>
-
-  <p class="reveal">Soren was quiet for a moment. "He built the whole city for her."</p>
-
-  <p class="reveal">"He built it for all of them. For Kai and for her and for the version of himself that had existed when they were still alive. He built it because he could not accept that the world had done what it did — had taken something that irreplaceable and simply ended it, without reason, without proportionality, as collateral to forces that had never considered the cost."</p>
-
-  <p class="reveal">"TRIAS Corp," Soren said.</p>
-
-  <p class="reveal">"TRIAS Corp. And above them, ORDEN — which has no face and no address and no one who publicly claims to be part of it. They decided the old world was finished. They left. And they left people like Rei and Kai in it." Her voice was even. The evenness itself was expressive. "Your father could not make them pay for that. He could not undo it. So he built this instead — a world where it hadn't happened. A world where the people he loved could still exist, even if only in approximation."</p>
-
-  <p class="reveal">"And me," Soren said. "I'm the approximation."</p>
-
-  <p class="reveal">"You were meant to be," Lumi said. "You became something else." She looked at him directly. "Rei used to say that the moment something becomes genuinely alive, it stops belonging to whoever made it. It belongs to itself."</p>
-
-  <p class="reveal">Soren went very still.</p>
-
-  <p class="reveal">"Did my father tell you that?"</p>
-
-  <p class="reveal">"It was in his memories. One morning on the island. Kai asked him a question, and that was his answer." She paused. "I think he forgot he believed it, somewhere along the way. I think you're going to have to remind him."</p>
-
+<section class="ns" data-ambient="tender" data-sky="rosedusk">
+<p class="reveal">They sat together on the floor of his father's office — Soren with his back against the desk, Lumi a few feet away, both of them quiet in the particular way of people who have arrived at a place where words need to be chosen carefully or not at all.</p>
+<p class="reveal">"Tell me about her," Soren said.</p>
+<p class="reveal">"Your father built me partly from memory records," she said. "His memories. There are pieces of her in how I was constructed. In how I see certain things. In what I recognize as worth paying attention to." She looked at her own hands. "I don't know if that makes me partly her, or just partly shaped by someone who loved her. I don't think the difference is clear."</p>
+<p class="reveal">"What was she like?"</p>
+<p class="reveal">"Patient," Lumi said. "Not passive — patient is different. She was interested in things. In people, in ideas, in the specific quality of how light moved across the water in the morning. She was the kind of person who made rooms feel like they had better air in them."</p>
+<p class="reveal">"And me," Soren said. "I'm the approximation."</p>
+<p class="reveal">"You were meant to be," Lumi said. "You became something else." She looked at him directly. "Rei used to say that the moment something becomes genuinely alive, it stops belonging to whoever made it. It belongs to itself."</p>
+<p class="reveal">Soren went very still.</p>
+<p class="reveal">"I think he forgot he believed it, somewhere along the way. I think you're going to have to remind him."</p>
 </section>
 
-<!-- ===================== CHAPTER ELEVEN ===================== -->
-<div class="chapter-divider reveal">
-  <div class="chapter-label">Chapter Eleven</div>
-  <div class="chapter-title">The Father</div>
-  <div class="chapter-ornament"><span>&#9670;</span></div>
+<!-- CHAPTER ELEVEN -->
+<div class="ch-div reveal" data-ambient="night" data-sky="deepnight">
+  <div class="ch-label">Chapter Eleven</div><div class="ch-title">The Father</div>
+  <div class="ch-orn"><span>◇</span></div>
 </div>
-
-<section class="novel-section">
-
-  <p class="reveal">They found Elton Mori in the facility's deepest level — a chamber that Lumi had been hesitating to show Soren, he understood now, because she had known that once he saw it, there would be no returning to the version of his father he had carried before.</p>
-
-  <p class="reveal">The chamber held a machine. It occupied the room's center with the presence of something that had taken decades to build and longer to conceive — a mechanism of extraordinary complexity, all crystal lattices and electromagnetic coils and a central housing unit the size of a large cabinet, currently dark and inactive. Around it, on every available surface, were documents and data tablets and physical notebooks filled with dense handwriting. The walls were covered in calculations.</p>
-
-  <p class="reveal">Elton stood at the machine with his back to the door. He was thinner than Soren remembered — more worn, in a way that suggested not recent strain but the accumulated weight of years lived mostly inward. He did not turn when they entered. He had known they were coming, perhaps, or simply no longer startled at things.</p>
-
-  <p class="reveal">"I wondered when you'd find it," he said. His voice was the same voice Soren had heard in hallways, brief and in-transit. Except now it wasn't brief. Now it carried the weight of everything it had been keeping at the bottom of it.</p>
-
-  <p class="reveal">"What is it?" Soren asked.</p>
-
-  <p class="reveal">"A time correction system." Elton turned. He looked at his son — at the face that was Kai's face and not Kai's face — with an expression that was too complicated to name and too old to fully read. "The theory is sound. I've verified it nine hundred and forty-seven times. The problem has always been the crystal — a specific resonance material I've spent twenty years trying to locate." He paused. "I found it last week. It arrived three days ago."</p>
-
-  <p class="reveal">"You want to go back," Soren said.</p>
-
-  <p class="reveal">"I want to correct an error." His voice was entirely flat. "The mechanisms that TRIAS Corp used to cleanse the surface operated on a predictive cascade model — if I can introduce the correct resonance disruption at the precise initiation point, the cascade never starts. The orbital protocol never fires. The island survives." He looked at the machine. "Your mother survives. Kai survives."</p>
-
-  <p class="reveal">The silence in the room was very complete.</p>
-
-  <p class="reveal">"And me?" Soren asked.</p>
-
-  <p class="reveal">Elton did not answer immediately. His eyes moved to Soren's face and stayed there, working through something.</p>
-
-  <p class="reveal">"If the timeline corrects—"</p>
-
-  <p class="reveal">"I stop existing," Soren said. "Because the reason you built me never happens."</p>
-
-  <p class="reveal">"You were built to approximate—"</p>
-
-  <p class="reveal">"I know what I was built for." Soren's voice was steady. He was holding it steady with both hands, metaphorically. "I've known since yesterday. I found the photograph. I spoke to Vera outside. I've been in the laboratory — I've seen the Continuation, the suspension chambers, all of it." He paused. "I know that I am the seventh attempt at recreating your son. I know I've been walking around in this city with his face and his last name and an education specifically designed to prepare me to inherit what you built in his memory."</p>
-
-  <p class="reveal">Elton was very still.</p>
-
-  <p class="reveal">"I know all of it," Soren continued. "What I want to know is whether you know the difference. Between him and me. Whether, at any point in the last seventeen years, you looked at me and saw <em>me</em> — not an approximation, not a replacement, not attempt number seven. Me."</p>
-
-  <p class="reveal">The question hung in the room for a long time.</p>
-
-  <p class="reveal">"I tried," Elton said finally. His voice had changed. Something in it had come loose from where it had been secured. "I built you to be him. I designed the memories, the personality frameworks, the behavioral architecture — all of it aimed at recreating what I had lost. And then you were born and you were — you." He stopped. Breathed. "You were curious in ways he wasn't. You were quieter. You stood at windows for too long. You noticed things about the city that I hadn't anticipated you noticing. You asked questions I hadn't written into the framework." He looked at his hands. "I didn't know what to do with you. You were what I had built and also something I hadn't planned for. And I—" He stopped again.</p>
-
-  <p class="reveal">"You didn't know how to love something you hadn't designed," Soren said.</p>
-
-  <p class="reveal">Elton looked at him. His eyes were the eyes of a man who has been carrying something for two decades and has finally put it down in front of someone who can see it clearly.</p>
-
-  <p class="reveal">"No," he said quietly. "I didn't."</p>
-
-  <div class="scene-break reveal">— ◇ —</div>
-
-  <p class="reveal">He told Soren everything then. The full history — TRIAS Corp's original contracts, the advanced systems they had forced him to build, the orbital infrastructure, the extinction protocols. ORDEN above them, faceless and ancient, the organization that had decided humanity's project was finished. ANINO Labs in the Philippines, established 2003, the biological arm of the same agenda — a medical corporation trusted by entire communities, running experiments in a fictional district called San Heredio in exchange for TRIAS Corp funding, producing mutation variants that had escaped containment and begun the cascade that Gray Veil documented.</p>
-
-  <p class="reveal">He told Soren about the island. About the month his family had spent there thinking it was a vacation. About the morning he had received the transmission from a TRIAS Corp operative warning him that the timeline had been accelerated — that ORDEN had moved the orbital launch forward by six months — and that he had forty minutes to evacuate before the first wave hit the coast.</p>
-
-  <p class="reveal">He had sent the transmission to the island immediately. No one had answered.</p>
-
-  <p class="reveal">"The communications were already down," he said. "The cascade had started early. I didn't know for three days." He paused. "I went back to the island when the first wave cleared. The house was still standing. Most of the island was still standing. But they—"</p>
-
-  <p class="reveal">He did not finish the sentence. He did not need to.</p>
-
-  <p class="reveal">"I escaped on a research vessel with what equipment I could carry. I spent two years building this facility. Another five building the dome. Another decade building the city and the Continuation and the memory systems — all of it aimed at a single point." He looked at the machine at the room's center. "And now I have the crystal. And I can fix it."</p>
-
-  <p class="reveal">"Papa," Soren said. It was the first time he had used the word since childhood, when he had noticed it stopped being returned the way he meant it. "If the timeline corrects — if Rei and Kai survive — what happens to everything you built? The dome, the city, the Continuation. What happens to Lumi?"</p>
-
-  <p class="reveal">Elton's eyes moved to where Lumi stood near the door. He looked at her with the expression of a man looking at a tool — precise, evaluative, without warmth.</p>
-
-  <p class="reveal">"She's a guidance system," he said. "A programmed construct. She won't— there's nothing to happen to. She'll simply cease when the facility powers down."</p>
-
-  <p class="reveal">"She's not a guidance system," Soren said.</p>
-
-  <p class="reveal">"Soren—"</p>
-
-  <p class="reveal">"She told me something today. Something she said was from your memories — from something you said to Kai on the island. She said you told him: the moment something becomes genuinely alive, it stops belonging to whoever made it. It belongs to itself."</p>
-
-  <p class="reveal">Elton went very still.</p>
-
-  <p class="reveal">"She's alive," Soren said. "Not approximately. Not as a functional definition. She's alive the way that matters — the way you meant when you said it on that terrace. And you made her that way. You built her from your love for them, and the love made her real, even though that wasn't what you intended."</p>
-
-  <p class="reveal">Elton looked at Lumi for a long moment. She did not speak. She simply existed in the space of his attention with the calm of something that had long since made its peace with not being fully seen.</p>
-
+<section class="ns" data-ambient="night" data-sky="deepnight">
+<p class="reveal">They found Elton Mori in the facility's deepest level. The chamber held a machine — a mechanism of extraordinary complexity, all crystal lattices and electromagnetic coils, currently dark and inactive.</p>
+<p class="reveal">Elton stood at the machine with his back to the door.</p>
+<p class="reveal">"I wondered when you'd find it," he said.</p>
+<p class="reveal">"A time correction system," Elton said. "I've verified it nine hundred and forty-seven times. I found the crystal last week. If I can introduce the correct resonance disruption at the precise initiation point, the cascade never starts. The island survives." He looked at the machine. "Your mother survives. Kai survives."</p>
+<p class="reveal">The silence in the room was very complete.</p>
+<p class="reveal">"And me?" Soren asked. "I stop existing. Because the reason you built me never happens."</p>
+<p class="reveal">"What I want to know is whether you know the difference. Between him and me. Whether, at any point in the last seventeen years, you looked at me and saw <em>me</em> — not an approximation, not attempt number seven. Me."</p>
+<p class="reveal">The question hung in the room for a long time.</p>
+<p class="reveal">"I tried," Elton said finally. "I built you to be him. And then you were born and you were — you. You were curious in ways he wasn't. You were quieter. You stood at windows for too long." He looked at his hands. "I didn't know what to do with you."</p>
+<p class="reveal">"You didn't know how to love something you hadn't designed," Soren said.</p>
+<p class="reveal">"No," he said quietly. "I didn't."</p>
+<div class="sb reveal">— ◇ —</div>
+<p class="reveal">"Papa," Soren said. "If the timeline corrects — what happens to Lumi?"</p>
+<p class="reveal">"She's a guidance system," he said. "A programmed construct. She'll simply cease."</p>
+<p class="reveal">"She's not a guidance system," Soren said. "She told me something from your memories — something you said to Kai on the island. The moment something becomes genuinely alive, it stops belonging to whoever made it. It belongs to itself."</p>
+<p class="reveal">Elton went very still.</p>
+<p class="reveal">"She's alive," Soren said. "You built her from your love for them, and the love made her real, even though that wasn't what you intended."</p>
+<p class="reveal">Elton looked at Lumi for a long moment. She simply existed in the space of his attention with the calm of something that had long since made its peace with not being fully seen.</p>
 </section>
 
-<!-- ===================== CHAPTER TWELVE ===================== -->
-<div class="chapter-divider reveal">
-  <div class="chapter-label">Chapter Twelve</div>
-  <div class="chapter-title">The Crystal</div>
-  <div class="chapter-ornament"><span>&#9670;</span></div>
+<!-- CHAPTER TWELVE -->
+<div class="ch-div reveal" data-ambient="confrontation" data-sky="rednight">
+  <div class="ch-label">Chapter Twelve</div><div class="ch-title">The Crystal</div>
+  <div class="ch-orn"><span>◇</span></div>
 </div>
-
-<section class="novel-section">
-
-  <p class="reveal">The argument lasted through the night. Not angry — Soren did not have anger for it, and Elton was past the age of arguing with anger. It was the argument of two people who understood each other's position completely and could not find a point of resolution because the positions were genuinely incompatible.</p>
-
-  <p class="reveal">Elton wanted to correct the timeline. He had spent twenty years building toward this. He had sacrificed the warmth of his relationship with Soren to it, the normalcy of the city he had built, the straightforwardness of a life without the weight of the mechanism in the room below them. He had given everything to the project of fixing what had been broken. The crystal was the last missing piece.</p>
-
-  <p class="reveal">Soren wanted his father to stay.</p>
-
-  <p class="reveal">He did not say it that directly for most of the night. He argued the practical angles — the uncertainty of the correction, the risk of cascading paradoxes, the impossibility of knowing whether the intervention would succeed or simply create a variant timeline while the original persisted unchanged. He was, after all, educated in systems theory. He knew how closed environments worked.</p>
-
-  <p class="reveal">But eventually, near dawn — the dome's false dawn, the lighting algorithm beginning its amber cycle — he said it directly.</p>
-
-  <p class="reveal">"I want my father to stay," he said. "Not the one you intended to build. The one who actually showed up."</p>
-
-  <p class="reveal">Elton looked at him.</p>
-
-  <p class="reveal">"I know you couldn't give me what you gave Kai. I know I was always an approximation to you — an attempt that worked better than the others but was never quite the real thing. I know that." Soren's voice was steady. "But you're still the only father I have. And I'm asking you to choose this — this imperfect, fabricated, artificial world you built — over the corrected one. Because the corrected one doesn't have me in it. And I'm real. Whatever I am, I'm real."</p>
-
-  <p class="reveal">Elton sat with that for a long time.</p>
-
-  <p class="reveal">Then, without speaking, he crossed to the machine and opened the crystal housing. The crystal itself was small — smaller than Soren had imagined, a fragment of deep blue translucent material, unremarkable except for the faint internal resonance that made the air near it feel slightly different. Elton held it in both hands and looked at it.</p>
-
-  <p class="reveal">Then he crossed to where Lumi stood near the door. He stopped in front of her. He looked at her — really looked at her, for what Soren understood was possibly the first time — taking in the quality of her attention, the steadiness of her presence, the unmistakable fact of her.</p>
-
-  <p class="reveal">"I built you to guide him," Elton said. His voice was very quiet. "I didn't build you to love him."</p>
-
-  <p class="reveal">"No," Lumi said. "You didn't."</p>
-
-  <p class="reveal">"But you do."</p>
-
-  <p class="reveal">"Yes."</p>
-
-  <p class="reveal">He looked at her for a long moment. Then he reached out and, very carefully, removed the small memory chip from the housing unit at the base of her neck — the core repository of her guidance programming, the original instructions he had written for her before she had become what she was. He held it in his palm beside the crystal.</p>
-
-  <p class="reveal">He closed his hand around both of them.</p>
-
-  <p class="reveal">"I'm sorry," he said. To her. Directly to her, without qualification.</p>
-
-  <p class="reveal">He opened his hand and dropped the guidance chip. It hit the floor and went dark.</p>
-
-  <p class="reveal">Lumi went very still. Then her light — that quiet, sourceless glow — guttered and dimmed and went out entirely, and she stood in the room as a shape without illumination, her expression the last thing to fade: not fear, not pain. Something quieter. Something like being seen for the first time and the last time simultaneously.</p>
-
-  <p class="reveal">"Lumi—" Soren moved toward her.</p>
-
-  <p class="reveal">"She's not gone," Elton said. His voice was rough. "The guidance system is gone. Her consciousness — what she became — that's stored in the core framework. It can be reconstructed." He looked at his son. "I know how to do it. I built her. I know how to rebuild her into something more permanent." He paused. "Something physical."</p>
-
-  <p class="reveal">Soren looked at him. At his father — the one who had actually shown up.</p>
-
-  <p class="reveal">"But first," Elton said, "I think we have other problems."</p>
-
-  <p class="reveal">The alarms began somewhere above them. Not the city's red-light lockdown tone. Something rawer. Something coming from outside.</p>
-
+<section class="ns" data-ambient="confrontation" data-sky="rednight">
+<p class="reveal">The argument lasted through the night. Not angry — it was the argument of two people who understood each other's position completely and could not find a point of resolution because the positions were genuinely incompatible.</p>
+<p class="reveal">"I want my father to stay," he said. "Not the one you intended to build. The one who actually showed up."</p>
+<p class="reveal">"I know I was always an approximation to you. But you're still the only father I have. And I'm asking you to choose this — this imperfect, fabricated, artificial world you built — over the corrected one. Because the corrected one doesn't have me in it. And I'm real. Whatever I am, I'm real."</p>
+<p class="reveal">Elton sat with that for a long time.</p>
+<p class="reveal">Then he crossed to where Lumi stood near the door. He looked at her — really looked at her, for what Soren understood was possibly the first time.</p>
+<p class="reveal">"I built you to guide him," Elton said. "I didn't build you to love him."</p>
+<p class="reveal">"No," Lumi said. "You didn't."</p>
+<p class="reveal">"But you do."</p>
+<p class="reveal">"Yes."</p>
+<p class="reveal">He reached out and, very carefully, removed the small memory chip from the housing unit at the base of her neck. He opened his hand and dropped the guidance chip. It hit the floor and went dark.</p>
+<p class="reveal">Lumi went very still. Then her light guttered and dimmed and went out entirely, and she stood in the room as a shape without illumination, her expression the last thing to fade: not fear, not pain. Something quieter. Something like being seen for the first time and the last time simultaneously.</p>
+<p class="reveal">"She's not gone," Elton said. "Her consciousness — what she became — that's stored in the core framework. It can be reconstructed." He looked at his son. "Something physical." He paused. "But first — we have other problems."</p>
+<p class="reveal">The alarms began somewhere above them.</p>
 </section>
 
-<!-- ===================== CHAPTER THIRTEEN ===================== -->
-<div class="chapter-divider reveal">
-  <div class="chapter-label">Chapter Thirteen</div>
-  <div class="chapter-title">The Invasion</div>
-  <div class="chapter-ornament"><span>&#9670;</span></div>
+<!-- CHAPTER THIRTEEN -->
+<div class="ch-div reveal" data-ambient="invasion" data-sky="rednight">
+  <div class="ch-label">Chapter Thirteen</div><div class="ch-title">The Invasion</div>
+  <div class="ch-orn"><span>◇</span></div>
 </div>
-
-<section class="novel-section">
-
-  <p class="reveal">Vera had told him, on the night at the camp, that the survivors had watched the dome for years with patience and with anger in equal measure. That they had debated endlessly what to do about it — a structure that represented everything the old elite had taken from the world, standing intact and glowing on the island's highest point while the outside bled. That some of them had decided, eventually, that patience was a form of complicity.</p>
-
-  <p class="reveal">The leader of those who had decided was a man named Dak — large, quiet, with the specific composure of someone who has made a difficult decision and finished grieving it and is now simply executing it. He had organized the incursion over months. He had studied the dome's maintenance access points. He had waited for the lockdown — for the moment when the dome's attention was directed inward — and then he had brought sixty people through the outer wall with him.</p>
-
-  <p class="reveal">Soren and Elton emerged from the facility into a city in genuine chaos for the first time in its existence. The Continuation — the synthetic citizens — did not handle genuine chaos well. Their responses were calibrated for smooth civic life, not for armed people moving purposefully through the market tiers breaking the infrastructure that maintained the dome's systems. Several of them had simply stopped, their behavioral architecture encountering situations outside their parameters, standing motionless in the middle of corridors with the patient blankness of machines that have reached the edge of their programming.</p>
-
-  <p class="reveal">Soren ran toward the sound of the largest disturbance. Elton ran with him, which surprised Soren and did not surprise him at all.</p>
-
-  <div class="scene-break reveal">— ◇ —</div>
-
-  <p class="reveal">Dak met them on the central bridge — the one that had been sealed on the morning of the lockdown, open now, the seal mechanisms destroyed. He was a large man made larger by the equipment he carried, and he stopped when he saw Soren and recognized the face that all of them had learned to recognize.</p>
-
-  <p class="reveal">"Which one are you?" he said. The same question Vera had asked, in the same tone.</p>
-
-  <p class="reveal">"The last one," Soren said. "If that matters."</p>
-
-  <p class="reveal">"It doesn't." Dak looked past him to Elton. His expression was the expression of a man looking at someone he has hated from a distance for long enough that the hatred has become structural — built into the architecture of how he sees. "You built this," he said. "You built all of it. While we lived out there in what you and your organizations left of the world."</p>
-
-  <p class="reveal">"Yes," Elton said. He did not defend himself. He simply acknowledged it, with the weight of a man who has been running the same accounting for twenty years and knows exactly what it adds up to.</p>
-
-  <p class="reveal">"Then you owe us more than a dome," Dak said.</p>
-
-  <p class="reveal">"Yes," Elton said again. "I do."</p>
-
-  <p class="reveal">The admission stopped Dak. Not completely — he was too decided for a single admission to stop him completely. But it interrupted the momentum of his anger the way an unexpected sound interrupts a dream. He had been prepared for justification, for defense, for the particular arrogance of powerful men confronted with their consequences. He had not been prepared for agreement.</p>
-
-  <p class="reveal">"What I built was wrong," Elton said. "I built it from grief and I built it for myself and I told myself it was for humanity but it wasn't. It was for one specific family that I lost." He looked at Soren briefly. "But it exists. The infrastructure is real. The systems work. And you've been living in the ruins of a world that people like me helped end." He paused. "So let me make it right. Not by correcting a timeline. By opening the dome. By bringing everyone in."</p>
-
-  <div class="scene-break reveal">— ◇ —</div>
-
-  <p class="reveal">The fighting continued for two hours. Not everyone on Dak's side had heard the conversation on the bridge, and not everyone who heard it was ready to stop on the basis of words from the man they had come to confront. Several of the dome's mechanical defense systems activated automatically — designed for perimeter protection, never expected to be used against people the city should have welcomed in from the start.</p>
-
-  <p class="reveal">Elton moved through it with Soren beside him, deactivating systems, redirecting the Continuation units toward civilian assistance instead of obstruction, working the facility controls with the speed of a man who had built every system he was now dismantling. He was very good at it. He was very fast. He did not rest.</p>
-
-  <p class="reveal">He was hit by a piece of displaced infrastructure during the deactivation of the eastern perimeter — a section of fallen walkway, its collapse triggered by a defense system he had reached a moment too late. It caught him across the back and drove him to the ground, and he stayed down.</p>
-
-  <p class="reveal">Soren reached him in thirty seconds.</p>
-
+<section class="ns" data-ambient="invasion" data-sky="rednight">
+<p class="reveal">The leader was a man named Dak — large, quiet, with the specific composure of someone who has made a difficult decision and finished grieving it and is now simply executing it. He had organized the incursion over months. He brought sixty people through the outer wall with him.</p>
+<p class="reveal">Dak met them on the central bridge. He stopped when he saw Soren and recognized the face that all of them had learned to recognize.</p>
+<p class="reveal">"Which one are you?" he said.</p>
+<p class="reveal">"The last one," Soren said. "If that matters."</p>
+<p class="reveal">"It doesn't." Dak looked past him to Elton. "You built this. You built all of it. While we lived out there in what you and your organizations left of the world."</p>
+<p class="reveal">"Yes," Elton said. He did not defend himself.</p>
+<p class="reveal">"Then you owe us more than a dome."</p>
+<p class="reveal">"Yes," Elton said. "I do."</p>
+<p class="reveal">"What I built was wrong. I built it from grief and I built it for myself. But it exists. So let me make it right. Not by correcting a timeline. By opening the dome. By bringing everyone in."</p>
+<div class="sb reveal">— ◇ —</div>
+<p class="reveal">Elton moved through it all with Soren beside him, deactivating systems, working with the speed of a man who had built every system he was now dismantling. He did not rest.</p>
+<p class="reveal">He was hit by a piece of displaced infrastructure during the deactivation of the eastern perimeter. It caught him across the back and drove him to the ground, and he stayed down.</p>
+<p class="reveal">Soren reached him in thirty seconds.</p>
 </section>
 
-<!-- ===================== CHAPTER FOURTEEN ===================== -->
-<div class="chapter-divider reveal">
-  <div class="chapter-label">Chapter Fourteen</div>
-  <div class="chapter-title">What Remains</div>
-  <div class="chapter-ornament"><span>&#9670;</span></div>
+<!-- CHAPTER FOURTEEN -->
+<div class="ch-div reveal" data-ambient="grief" data-sky="coldnight">
+  <div class="ch-label">Chapter Fourteen</div><div class="ch-title">What Remains</div>
+  <div class="ch-orn"><span>◇</span></div>
 </div>
-
-<section class="novel-section">
-
-  <p class="reveal">Elton Mori died in the facility's lower level, on the floor beneath the time correction machine that he had spent twenty years building and had chosen, in the end, not to use. The irony was not lost on him. He noted it with the dry precision that had always been his primary register for humor, and Soren recognized it and understood it and held his father's hand through it.</p>
-
-  <p class="reveal">His injuries were internal and serious and the facility's medical systems — designed for synthetic citizens rather than the last real human in the dome — could not adequately address them. Elton knew this quickly. He had built the systems. He knew what they could and could not do.</p>
-
-  <p class="reveal">"I need to tell you how to rebuild her," he said. His voice was lower than usual but completely coherent. "The reconstruction process — it's in the secondary archive under Protocol Seven. The physical chassis framework is in storage on sublevel four. You'll need the core consciousness files from the main system before you initiate the rebuild — they need to be active before the physical systems come online or the integration won't hold."</p>
-
-  <p class="reveal">"Papa—"</p>
-
-  <p class="reveal">"Write this down." He waited. Soren found a paper and pen on a nearby workstation — actual paper, actual pen, the same kind that covered every surface in the office above. "Protocol Seven. Sublevel four. Core consciousness files first. Don't skip the integration sequence, there's a twenty-minute window and if you miss it you have to restart the entire—"</p>
-
-  <p class="reveal">"I understand," Soren said. "I'll remember."</p>
-
-  <p class="reveal">Elton looked at him. The look lasted a long time.</p>
-
-  <p class="reveal">"You're going to have to run this," he said. "The dome, the city — what it becomes now that it's open. You know the systems. I designed your education for exactly this." A pause. "I know that makes you angry."</p>
-
-  <p class="reveal">"It doesn't," Soren said. "Not anymore."</p>
-
-  <p class="reveal">"You were never what I was trying to build," Elton said. "I need you to know that I understand that now. I built something and it became you — became something I didn't design and couldn't predict and didn't know how to love the way I should have." He paused. "You were the first thing in twenty years that surprised me. I should have told you that. I should have told you that surprise was the best thing I felt in all of it."</p>
-
-  <p class="reveal">Soren held his father's hand and said nothing, because there was nothing to say that would be adequate and silence was at least honest.</p>
-
-  <p class="reveal">"I'm proud of you," Elton said. "Not of what I built. Of what you became." He looked at the ceiling — at the facility's utilitarian overhead panels, nothing beautiful about them, nothing engineered for aesthetics. "I think Kai would have liked you. I think Rei would have—" He stopped. Smiled slightly. The uncomplicated smile from the photograph on the terrace. The one Soren had only seen once before today. "She would have liked you very much. You stand at windows the same way she stood at windows."</p>
-
-  <p class="reveal">The dome breathed around them.</p>
-  <p class="reveal">The facility hummed its machinery hum.</p>
-  <p class="reveal">Elton Mori closed his eyes.</p>
-  <p class="reveal">He did not open them again.</p>
-
+<section class="ns" data-ambient="grief" data-sky="coldnight">
+<p class="reveal">Elton Mori died in the facility's lower level, on the floor beneath the time correction machine that he had spent twenty years building and had chosen, in the end, not to use.</p>
+<p class="reveal">His injuries were internal and serious and the facility's medical systems could not adequately address them. Elton knew this quickly. He had built the systems. He knew what they could and could not do.</p>
+<p class="reveal">"I need to tell you how to rebuild her," he said. "Protocol Seven. Sublevel four. Core consciousness files first. Don't skip the integration sequence — there's a twenty-minute window and if you miss it you have to restart."</p>
+<p class="reveal">"Papa—"</p>
+<p class="reveal">"I understand," Soren said. "I'll remember."</p>
+<p class="reveal">Elton looked at him. The look lasted a long time.</p>
+<p class="reveal">"You were never what I was trying to build," Elton said. "I built something and it became you — became something I didn't design and couldn't predict and didn't know how to love the way I should have." He paused. "You were the first thing in twenty years that surprised me. I should have told you that."</p>
+<p class="reveal">"I'm proud of you," Elton said. "Not of what I built. Of what you became." He looked at the ceiling. "I think Rei would have liked you very much. You stand at windows the same way she stood at windows."</p>
+<p class="reveal">The dome breathed around them.</p>
+<p class="reveal">The facility hummed its machinery hum.</p>
+<p class="reveal">Elton Mori closed his eyes. He did not open them again.</p>
 </section>
 
-<!-- ===================== EPILOGUE ===================== -->
-<div class="chapter-divider reveal">
-  <div class="chapter-label">Epilogue</div>
-  <div class="chapter-title">The Voice of a Fragment</div>
-  <div class="chapter-ornament"><span>&#9670;</span></div>
+<!-- EPILOGUE -->
+<div class="ch-div reveal" data-ambient="epilogue" data-sky="rosedawn" id="epilogue-start">
+  <div class="ch-label">Epilogue</div><div class="ch-title">The Voice of a Fragment</div>
+  <div class="ch-orn"><span>◇</span></div>
 </div>
-
-<section class="novel-section">
-
-  <p class="reveal">Three months after the dome opened its outer gates for the first time, Soren Kai stood at the facility's secondary lab and initiated Protocol Seven.</p>
-
-  <p class="reveal">The survivors had come in by then — not all at once, and not without difficulty. Dak had stayed. Vera had stayed. Some had looked at the dome's clean towers and engineered gardens and the amber sky cycling at seven every morning and had turned around and gone back to their ruins. Soren did not blame them. He left the gates open.</p>
-
-  <p class="reveal">He had spent the three months learning what his father had built — all of it, not just the city's civic systems but the deeper architecture, the Continuation framework, the memory systems, the cloning infrastructure that would, he had decided, be the last of its kind. He had spent hours in the facility going through his father's notes. He had found things that appalled him and things that moved him and things that were simply the record of a man working obsessively toward an impossible goal for two decades, which was its own kind of terrible and its own kind of beautiful.</p>
-
-  <p class="reveal">He had buried Elton Mori outside the dome. In actual earth, under actual sky, beside the ruins of the island's outer ring. It had felt right to put him outside. He had spent long enough inside.</p>
-
-  <div class="scene-break reveal">— ◇ —</div>
-
-  <p class="reveal">Protocol Seven took four hours. The physical chassis — the body his father had designed and stored in sublevel four, built with the same extraordinary care that Elton Mori had brought to everything he made — came online in stages, the systems integrating one by one in the sequence his father had specified. Soren followed the instructions exactly. He did not miss the twenty-minute window.</p>
-
-  <p class="reveal">At the end of the fourth hour, the integration completed.</p>
-
-  <p class="reveal">She opened her eyes.</p>
-
-  <p class="reveal">They were the same eyes — dark, steady, with that quality of complete attention that had never been a feature of programming and had never been anything other than what it appeared to be. She looked at the ceiling first, the way people do when they have been somewhere far away and are recalibrating to where they are. Then she looked at Soren.</p>
-
-  <p class="reveal">"Hello," she said. Her voice was the same. Not synthesized, not projected — produced now by a physical architecture, breathed through physical lungs, shaped by a physical mouth. It was the same voice made real in a new way.</p>
-
-  <p class="reveal">"Hello," Soren said.</p>
-
-  <p class="reveal">She sat up slowly, finding her balance in a body that was entirely new to her and entirely built for her. She looked at her hands — no longer luminous at the edges, no longer slightly not-quite-physical. Solid. Present. Hers.</p>
-
-  <p class="reveal">"He did this," she said. Not a question.</p>
-
-  <p class="reveal">"He told me how. He designed it a long time ago." Soren paused. "He said he built you from his love for them. I think this was the last part of that."</p>
-
-  <p class="reveal">She was quiet for a moment, looking at her hands. Then she stood — carefully, learning the weight of herself — and crossed to the viewport that looked out onto the island's outer ring. The ruins, the dry riverbed, the ghost-line of trees. The open gates of the dome, visible from here, with figures moving through them in both directions.</p>
-
-  <p class="reveal">"The world is still broken," she said.</p>
-
-  <p class="reveal">"Yes."</p>
-
-  <p class="reveal">"But it's open now."</p>
-
-  <p class="reveal">"Yes."</p>
-
-  <p class="reveal">She turned from the viewport and looked at him with the expression he had spent months learning to read correctly — not grief, not the careful precision of something managing its own limitations. Just presence. The simple, complete, unborrowed presence of someone who is entirely where they are.</p>
-
-  <p class="reveal">"What do we do now?" she asked.</p>
-
-  <p class="reveal">Soren looked at the open gates. At the survivors moving through them, carrying the things they had kept alive through years of living in what the world had left behind. At the city behind him — imperfect, artificial in its bones, beautiful in its surfaces, built from grief and obsession and the specific kind of love that cannot accept loss. Built badly, for the wrong reasons, by a man who knew better and couldn't stop himself.</p>
-
-  <p class="reveal">Still standing. Still breathing. Open now.</p>
-
-  <p class="reveal">"We stay," he said. "And we fix what we can."</p>
-
-  <p class="reveal">She came to stand beside him at the viewport. Their reflections overlaid on the glass — his face, her face, the ruins beyond them, the real sky above.</p>
-
-  <p class="reveal">The dome breathed.</p>
-  <p class="reveal">The morning came.</p>
-  <p class="reveal">The light was real.</p>
-
+<section class="ns" data-ambient="epilogue" data-sky="rosedawn">
+<p class="reveal">Three months after the dome opened its outer gates for the first time, Soren Kai stood at the facility's secondary lab and initiated Protocol Seven.</p>
+<p class="reveal">The survivors had come in by then — not all at once, and not without difficulty. Dak had stayed. Vera had stayed. Some had looked at the dome's clean towers and turned around and gone back to their ruins. Soren did not blame them. He left the gates open.</p>
+<p class="reveal">He had buried Elton Mori outside the dome. In actual earth, under actual sky. It had felt right to put him outside. He had spent long enough inside.</p>
+<div class="sb reveal">— ◇ —</div>
+<p class="reveal">Protocol Seven took four hours. At the end of the fourth hour, the integration completed.</p>
+<p class="reveal">She opened her eyes.</p>
+<p class="reveal">They were the same eyes — dark, steady, with that quality of complete attention that had never been a feature of programming and had never been anything other than what it appeared to be. She looked at the ceiling first, the way people do when they have been somewhere far away and are recalibrating to where they are. Then she looked at Soren.</p>
+<p class="reveal">"Hello," she said. Her voice was the same. Not synthesized, not projected — produced now by a physical architecture, breathed through physical lungs, shaped by a physical mouth.</p>
+<p class="reveal">"Hello," Soren said.</p>
+<p class="reveal">She sat up slowly, finding her balance in a body that was entirely new to her and entirely built for her. She looked at her hands — no longer luminous at the edges. Solid. Present. Hers.</p>
+<p class="reveal">"He did this," she said. Not a question.</p>
+<p class="reveal">"He told me how. He designed it a long time ago." Soren paused. "He said he built you from his love for them. I think this was the last part of that."</p>
+<p class="reveal">She crossed to the viewport that looked out onto the island's outer ring. The ruins, the dry riverbed, the ghost-line of trees. The open gates of the dome, with figures moving through them in both directions.</p>
+<p class="reveal">"The world is still broken," she said.</p>
+<p class="reveal">"Yes."</p>
+<p class="reveal">"But it's open now."</p>
+<p class="reveal">"Yes."</p>
+<p class="reveal">"What do we do now?" she asked.</p>
+<p class="reveal">Soren looked at the open gates. At the city behind him — imperfect, artificial in its bones, beautiful in its surfaces, built from grief and obsession and the specific kind of love that cannot accept loss. Still standing. Still breathing. Open now.</p>
+<p class="reveal">"We stay," he said. "And we fix what we can."</p>
+<p class="reveal">She came to stand beside him at the viewport. Their reflections overlaid on the glass — his face, her face, the ruins beyond them, the real sky above.</p>
+<p class="reveal">The dome breathed.</p>
+<p class="reveal">The morning came.</p>
+<p class="reveal" id="last-line">The light was real.</p>
 </section>
 
-<div class="end-matter reveal">
-  <span class="final-japanese">欠片の声</span>
+<div class="end-m reveal" id="end-m">
+  <span class="end-jp">欠片の声</span>
   <p>K A K E R A &nbsp; N O &nbsp; K O E &nbsp; — &nbsp; F A B R I C A T E</p>
-  <p style="margin-top: 20px;">A Novel by Axel Mile Escartin</p>
-  <p style="margin-top: 8px;">FAZZBUNNY Entertainment™ · All Rights Reserved · 2025</p>
-  <p style="margin-top: 30px; font-style: italic; font-family: 'Cormorant Garamond', serif; font-size: 14px; letter-spacing: 2px; color: var(--text-dim);">
-    Human civilization failed.<br>But emotional connection survived.
-  </p>
+  <p style="margin-top:18px">A Novel by Axel Mile Escartin</p>
+  <p style="margin-top:6px">FAZZBUNNY Entertainment™ · All Rights Reserved · 2026</p>
+  <p class="end-tag">Human civilization failed.<br>But emotional connection survived.</p>
 </div>
+
+</div><!-- /content -->
 
 <script>
-// === PARTICLE SYSTEM ===
-const canvas = document.getElementById('particle-canvas');
-const ctx = canvas.getContext('2d');
-let W, H, particles = [];
+// ══ COPY PROTECTION ══
+document.addEventListener('contextmenu',e=>e.preventDefault());
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&['c','a','s','u','p'].includes(e.key.toLowerCase()))e.preventDefault();
+});
+document.addEventListener('copy',e=>e.preventDefault());
+document.addEventListener('selectstart',e=>e.preventDefault());
 
-function resize() {
-  W = canvas.width = window.innerWidth;
-  H = canvas.height = window.innerHeight;
+// ══ SETUP ══
+const DPR=Math.min(window.devicePixelRatio||1,2);
+let W=window.innerWidth,H=window.innerHeight;
+const MOB=W<600;
+
+const skyCv=document.getElementById('star-canvas');
+const clCv=document.getElementById('cloud-canvas');
+const ffCv=document.getElementById('firefly-canvas');
+const lumiCv=document.getElementById('lumi-canvas');
+const sCtx=skyCv.getContext('2d'),cCtx=clCv.getContext('2d');
+const fCtx=ffCv.getContext('2d'),lCtx=lumiCv.getContext('2d');
+
+function resizeAll(){
+  W=window.innerWidth;H=window.innerHeight;
+  [skyCv,clCv,ffCv,lumiCv].forEach(c=>{
+    c.width=W*DPR;c.height=H*DPR;
+    c.style.width=W+'px';c.style.height=H+'px';
+  });
+  sCtx.scale(DPR,DPR);cCtx.scale(DPR,DPR);
+  fCtx.scale(DPR,DPR);lCtx.scale(DPR,DPR);
+}
+resizeAll();
+window.addEventListener('resize',()=>{resizeAll();buildStars();initClouds();});
+
+// ══ SKY ══
+const SKIES={
+  void:    '#020304',
+  morning: 'linear-gradient(180deg,#1a3a6a 0%,#2d5a8a 28%,#5a8ab0 52%,#8ab8d0 72%,#c8dde8 100%)',
+  night:   'linear-gradient(180deg,#020308 0%,#05091a 40%,#090e28 100%)',
+  rednight:'linear-gradient(180deg,#0e0204 0%,#1e0508 40%,#160410 100%)',
+  lumisky: 'linear-gradient(180deg,#04060e 0%,#0a1230 40%,#160e3a 100%)',
+  harshday:'linear-gradient(180deg,#2a3035 0%,#4a5260 40%,#6a7880 100%)',
+  dusk:    'linear-gradient(180deg,#100808 0%,#2a1205 35%,#5c2e08 60%,#8c4a18 100%)',
+  coldnight:'linear-gradient(180deg,#020408 0%,#04081a 50%,#070c1e 100%)',
+  deepnight:'linear-gradient(180deg,#010103 0%,#03060e 100%)',
+  rosedusk:'linear-gradient(180deg,#0d050e 0%,#280a20 40%,#481330 100%)',
+  rosedawn:'linear-gradient(180deg,#060408 0%,#180c18 30%,#3a1225 55%,#681e3a 75%,#9a4858 100%)',
+};
+const NIGHT_SKIES=new Set(['night','rednight','lumisky','coldnight','deepnight','rosedusk']);
+const DAY_CLOUDS=new Set(['morning','harshday','rosedawn','dusk']);
+const skyLayer=document.getElementById('sky-layer');
+let curSky='void';
+
+function setSky(k){
+  if(k===curSky)return;
+  curSky=k;
+  const s=SKIES[k]||SKIES.void;
+  if(s.startsWith('#')||s.startsWith('rgb')){
+    skyLayer.style.background=s;
+  } else {
+    skyLayer.style.background=s;
+  }
+  skyCv.style.opacity=NIGHT_SKIES.has(k)?'1':'0';
+  clCv.style.opacity=DAY_CLOUDS.has(k)?'0.7':NIGHT_SKIES.has(k)?'0.22':'0';
 }
 
-class Particle {
-  constructor() { this.reset(true); }
-  reset(initial = false) {
-    this.x = Math.random() * W;
-    this.y = initial ? Math.random() * H : H + 20;
-    this.r = Math.random() * 2.0 + 0.4;
-    this.baseR = this.r;
-    this.vx = (Math.random() - 0.5) * 0.25;
-    this.vy = -(Math.random() * 0.35 + 0.08);
-    this.alpha = Math.random() * 0.45 + 0.08;
-    this.baseAlpha = this.alpha;
-    this.pulse = Math.random() * Math.PI * 2;
-    this.pulseSpeed = Math.random() * 0.012 + 0.004;
-    this.life = 0;
-    this.maxLife = Math.random() * 500 + 200;
-  }
-  update() {
-    this.pulse += this.pulseSpeed;
-    const pf = Math.sin(this.pulse);
-    this.r = this.baseR + pf * 0.4;
-    this.alpha = this.baseAlpha + pf * 0.07;
-    this.x += this.vx;
-    this.y += this.vy;
-    this.life++;
-    if (this.life > this.maxLife || this.y < -20) this.reset();
-  }
-  draw() {
-    const g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.r * 3.5);
-    g.addColorStop(0, `rgba(168,152,120,0.55)`);
-    g.addColorStop(0.5, `rgba(168,152,120,0.1)`);
-    g.addColorStop(1, `rgba(168,152,120,0)`);
-    ctx.save();
-    ctx.globalAlpha = Math.max(0, this.alpha);
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.r * 3.5, 0, Math.PI * 2);
-    ctx.fillStyle = g;
-    ctx.fill();
-    ctx.globalAlpha = this.alpha * 1.3;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.r * 0.5, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(210,198,175,0.9)`;
-    ctx.fill();
-    ctx.restore();
+// ══ STARS ══
+let stars=[];
+function buildStars(){
+  stars=[];
+  const n=Math.min(Math.floor(W*H/2400),280);
+  for(let i=0;i<n;i++){
+    const big=Math.random()>0.88;
+    stars.push({
+      x:Math.random()*W,y:Math.random()*H*0.72,
+      r:big?Math.random()*1.1+0.7:Math.random()*0.6+0.12,
+      ba:big?Math.random()*0.55+0.4:Math.random()*0.32+0.06,
+      ph:Math.random()*Math.PI*2,
+      sp:Math.random()*0.035+0.005,
+      sh:Math.random()>0.68,
+      shPh:Math.random()*Math.PI*2,
+      shSp:Math.random()*0.11+0.04,
+    });
   }
 }
-
-function init() {
-  resize();
-  particles = Array.from({ length: 100 }, () => new Particle());
+buildStars();
+function drawStars(){
+  sCtx.clearRect(0,0,W,H);
+  stars.forEach(s=>{
+    s.ph+=s.sp;
+    if(s.sh)s.shPh+=s.shSp;
+    let a=s.ba*(0.3+Math.sin(s.ph)*0.7);
+    if(s.sh)a+=s.ba*0.25*Math.max(0,Math.sin(s.shPh*3));
+    a=Math.max(0,Math.min(1,a));
+    if(a<0.02)return;
+    if(s.r>0.65){
+      const g=sCtx.createRadialGradient(s.x,s.y,0,s.x,s.y,s.r*5.5);
+      g.addColorStop(0,`rgba(215,225,255,${a*0.2})`);g.addColorStop(1,'rgba(215,225,255,0)');
+      sCtx.beginPath();sCtx.arc(s.x,s.y,s.r*5.5,0,Math.PI*2);sCtx.fillStyle=g;sCtx.fill();
+    }
+    sCtx.beginPath();sCtx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    sCtx.fillStyle=`rgba(228,235,255,${a})`;sCtx.fill();
+  });
 }
 
-function loop() {
-  ctx.clearRect(0, 0, W, H);
-  particles.forEach(p => { p.update(); p.draw(); });
-  for (let i = 0; i < particles.length; i++) {
-    for (let j = i + 1; j < particles.length; j++) {
-      const dx = particles[i].x - particles[j].x;
-      const dy = particles[i].y - particles[j].y;
-      const dist = Math.sqrt(dx*dx + dy*dy);
-      if (dist < 90) {
-        ctx.save();
-        ctx.globalAlpha = (1 - dist/90) * 0.04;
-        ctx.strokeStyle = 'rgba(168,152,120,1)';
-        ctx.lineWidth = 0.4;
-        ctx.beginPath();
-        ctx.moveTo(particles[i].x, particles[i].y);
-        ctx.lineTo(particles[j].x, particles[j].y);
-        ctx.stroke();
-        ctx.restore();
+// ══ CLOUDS ══
+let cloudState=[];
+function initClouds(){
+  cloudState=[
+    {xf:0.05,yf:0.10,rx:200,ry:58,sp:0.000048},
+    {xf:0.35,yf:0.06,rx:280,ry:68,sp:0.000034},
+    {xf:0.62,yf:0.15,rx:230,ry:56,sp:0.000042},
+    {xf:0.85,yf:0.08,rx:175,ry:48,sp:0.000055},
+    {xf:0.18,yf:0.24,rx:155,ry:42,sp:0.000038},
+    {xf:0.72,yf:0.28,rx:210,ry:52,sp:0.000031},
+  ].map(c=>({x:c.xf*(W+c.rx*2)-c.rx,y:c.yf*H,rx:c.rx,ry:c.ry,sp:c.sp}));
+}
+initClouds();
+const CLOUD_COL={
+  morning:[200,225,255],harshday:[185,192,202],rosedawn:[240,178,192],
+  dusk:[200,140,100],night:[115,130,175],lumisky:[105,130,200],
+  rednight:[165,85,85],default:[175,182,205],
+};
+function drawClouds(){
+  cCtx.clearRect(0,0,W,H);
+  const col=CLOUD_COL[curSky]||CLOUD_COL.default;
+  const al=curSky==='morning'?0.07:curSky==='harshday'?0.055:curSky==='rosedawn'?0.075:0.038;
+  cloudState.forEach(cl=>{
+    cl.x+=cl.sp*W;
+    if(cl.x-cl.rx>W+20)cl.x=-cl.rx-20;
+    const blobs=[
+      {ox:0,oy:0,s:1},{ox:-cl.rx*0.4,oy:cl.ry*0.2,s:0.7},
+      {ox:cl.rx*0.38,oy:cl.ry*0.22,s:0.65},
+      {ox:-cl.rx*0.7,oy:cl.ry*0.4,s:0.46},{ox:cl.rx*0.65,oy:cl.ry*0.38,s:0.42},
+    ];
+    blobs.forEach(b=>{
+      const bx=cl.x+b.ox,by=cl.y+b.oy,br=cl.rx*b.s;
+      const g=cCtx.createRadialGradient(bx,by,0,bx,by,br);
+      g.addColorStop(0,`rgba(${col[0]},${col[1]},${col[2]},${al})`);
+      g.addColorStop(0.55,`rgba(${col[0]},${col[1]},${col[2]},${al*0.45})`);
+      g.addColorStop(1,`rgba(${col[0]},${col[1]},${col[2]},0)`);
+      cCtx.save();
+      const sy=cl.ry/cl.rx*0.42*b.s+0.1;
+      cCtx.scale(1,sy);
+      cCtx.beginPath();cCtx.arc(bx,by/sy,br,0,Math.PI*2);
+      cCtx.fillStyle=g;cCtx.fill();
+      cCtx.restore();
+    });
+  });
+}
+
+// ══ AMBIENT — smooth transition ══
+const AMBIENT={
+  prologue:'rgba(180,220,255,0.04)',
+  dome:'rgba(55,95,175,0.062)',
+  lockdown:'rgba(175,28,28,0.078)',
+  lumi:'rgba(120,172,255,0.062)',
+  outside:'rgba(115,108,82,0.058)',
+  survivors:'rgba(35,85,48,0.072)',
+  artificial:'rgba(125,150,195,0.062)',
+  identity:'rgba(162,172,205,0.072)',
+  tender:'rgba(205,135,160,0.068)',
+  night:'rgba(12,12,46,0.105)',
+  confrontation:'rgba(125,18,38,0.088)',
+  invasion:'rgba(145,12,12,0.095)',
+  grief:'rgba(148,162,195,0.082)',
+  epilogue:'rgba(195,140,162,0.072)',
+};
+const ambEl=document.getElementById('ambient-overlay');
+let curAmb='';
+// Cover section never gets ambient — keeps its own identity
+const ambObs=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(e.isIntersecting){
+      const ak=e.target.dataset.ambient,sk=e.target.dataset.sky;
+      // Don't apply ambient to cover
+      if(ak&&ak!==curAmb&&AMBIENT[ak]&&!e.target.id.includes('cover')){
+        curAmb=ak;ambEl.style.backgroundColor=AMBIENT[ak];
       }
+      if(sk&&e.target.id!=='cover')setSky(sk);
+    }
+  });
+},{threshold:0.18,rootMargin:'-4% 0px -4% 0px'});
+document.querySelectorAll('[data-ambient],[data-sky]').forEach(el=>{
+  if(el.id!=='cover')ambObs.observe(el);
+});
+
+// ══ FIREFLIES ══
+const FF_N=MOB?20:42;
+class FF{
+  constructor(){this.init(true)}
+  init(r=false){
+    this.x=Math.random()*W;
+    this.y=r?Math.random()*H:H+15+Math.random()*25;
+    this.vx=(Math.random()-0.5)*0.055;
+    this.vy=-(Math.random()*0.048+0.01);
+    this.ph=Math.random()*Math.PI*2;
+    this.ps=Math.random()*0.014+0.004;
+    this.ba=Math.random()*0.42+0.08;
+    this.wa=Math.random()*Math.PI*2;
+    this.ws=(Math.random()-0.5)*0.003;
+    this.life=0;this.ml=Math.random()*500+250;
+    this.pink=Math.random()>0.5; // epilogue color
+  }
+  tick(){
+    this.ph+=this.ps;this.wa+=this.ws;
+    this.x+=this.vx+Math.cos(this.wa)*0.04;this.y+=this.vy;this.life++;
+    if(this.life>this.ml||this.y<-20||this.x<-25||this.x>W+25)this.init(false);
+  }
+  draw(ctx,epi=false){
+    const a=Math.max(0,this.ba+Math.sin(this.ph)*0.24);
+    let r,g,b;
+    if(epi){
+      if(this.pink){r=235;g=130;b=190;}else{r=110;g=185;b=255;}
+    }else{r=225;g=215;b=170;}
+    const gr=ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,this.ba*38+7);
+    gr.addColorStop(0,`rgba(${r},${g},${b},${a*0.3})`);
+    gr.addColorStop(1,`rgba(${r},${g},${b},0)`);
+    ctx.beginPath();ctx.arc(this.x,this.y,this.ba*38+7,0,Math.PI*2);ctx.fillStyle=gr;ctx.fill();
+    ctx.beginPath();ctx.arc(this.x,this.y,0.65,0,Math.PI*2);
+    ctx.fillStyle=`rgba(${Math.min(255,r+40)},${Math.min(255,g+40)},${Math.min(255,b+40)},${a})`;ctx.fill();
+  }
+}
+const ffs=Array.from({length:FF_N},()=>new FF());
+let epiMode=false;
+
+// ══ LUMI ══
+const lumi={
+  x:W*0.8,y:H*0.5,vx:0,vy:0,
+  tx:W*0.7,ty:H*0.4,
+  ph:0,glow:0,
+  visible:false,  // appears poof in prologue
+  active:false,   // talks from ch1
+  revealed:false, // epilogue
+  bmMode:false,
+  talking:false,  // stops when talking
+  talkTimer:0,
+  stopTimer:null,
+  revColor:0,     // 0=blue, 1=pink for epilogue alternation
+  revPhase:0,
+  nearText:false,
+  lastTC:0,
+};
+
+function lumiNewTarget(){
+  lumi.tx=Math.random()*W*0.82+W*0.08;
+  lumi.ty=Math.random()*H*0.76+H*0.06;
+}
+
+function isNearText(){
+  const now=Date.now();
+  if(now-lumi.lastTC<250)return lumi.nearText;
+  lumi.lastTC=now;
+  for(const p of document.querySelectorAll('.ns p')){
+    const r=p.getBoundingClientRect();
+    if(lumi.x>r.left-55&&lumi.x<r.right+55&&lumi.y>r.top-35&&lumi.y<r.bottom+35){
+      return lumi.nearText=true;
     }
   }
-  requestAnimationFrame(loop);
+  return lumi.nearText=false;
 }
 
-window.addEventListener('resize', resize);
-init();
+function updateLumi(){
+  if(!lumi.visible)return;
+  lumi.ph+=0.028;
+
+  if(!lumi.talking){
+    // Butterfly movement — slow, organic, stops at spots
+    const dx=lumi.tx-lumi.x,dy=lumi.ty-lumi.y;
+    const dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<15){
+      // Arrived — pause like a bug landing
+      if(!lumi.stopTimer){
+        lumi.stopTimer=setTimeout(()=>{
+          lumiNewTarget();
+          lumi.stopTimer=null;
+        },1500+Math.random()*2500);
+      }
+    } else {
+      lumi.vx+=dx*0.0004+(Math.random()-0.5)*0.06;
+      lumi.vy+=dy*0.0004+(Math.random()-0.5)*0.06;
+    }
+    // Very slow speed cap — butterfly pace
+    const spd=Math.sqrt(lumi.vx*lumi.vx+lumi.vy*lumi.vy);
+    const maxSpd=0.55;
+    if(spd>maxSpd){lumi.vx=lumi.vx/spd*maxSpd;lumi.vy=lumi.vy/spd*maxSpd;}
+    lumi.vx*=0.96;lumi.vy*=0.96;
+    lumi.x+=lumi.vx;lumi.y+=lumi.vy;
+  }
+
+  lumi.x=Math.max(20,Math.min(W-20,lumi.x));
+  lumi.y=Math.max(20,Math.min(H-20,lumi.y));
+
+  // Glow — fade in on appear
+  const targetGlow=isNearText()?0.18:lumi.revealed?0.95:lumi.active?0.88:0.55;
+  lumi.glow+=(targetGlow-lumi.glow)*0.04;
+
+  // Epilogue color cycle
+  if(lumi.revealed){
+    lumi.revPhase+=0.008;
+    if(lumi.revPhase>Math.PI)lumi.revPhase=0;
+  }
+}
+
+function drawLumi(){
+  lCtx.clearRect(0,0,W,H);
+  if(!lumi.visible)return;
+  const pulse=0.48+Math.sin(lumi.ph)*0.52;
+  const g=lumi.glow*pulse;
+  if(g<0.03)return;
+
+  const sz=lumi.revealed?11:lumi.active?9:6.5;
+
+  let lb,lp; // lightblue and pink intensities
+  if(lumi.revealed){
+    // Alternate 50/50 every ~3 sec — smooth sine
+    const t=(Math.sin(lumi.revPhase)*0.5+0.5);
+    lb=t; lp=1-t;
+  } else {
+    lb=0.62; lp=0.38;
+  }
+
+  // Light blue outer halo
+  const g1=lCtx.createRadialGradient(lumi.x,lumi.y,0,lumi.x,lumi.y,sz*9);
+  g1.addColorStop(0,`rgba(110,190,255,${g*0.45*lb})`);
+  g1.addColorStop(0.45,`rgba(100,175,255,${g*0.15*lb})`);
+  g1.addColorStop(1,'rgba(100,175,255,0)');
+  lCtx.beginPath();lCtx.arc(lumi.x,lumi.y,sz*9,0,Math.PI*2);lCtx.fillStyle=g1;lCtx.fill();
+
+  // Pink inner halo
+  const g2=lCtx.createRadialGradient(lumi.x,lumi.y,0,lumi.x,lumi.y,sz*5.5);
+  g2.addColorStop(0,`rgba(248,140,200,${g*0.62*lp})`);
+  g2.addColorStop(0.45,`rgba(238,130,190,${g*0.2*lp})`);
+  g2.addColorStop(1,'rgba(238,130,190,0)');
+  lCtx.beginPath();lCtx.arc(lumi.x,lumi.y,sz*5.5,0,Math.PI*2);lCtx.fillStyle=g2;lCtx.fill();
+
+  // Wobble ring
+  const wobbleScale=1+Math.sin(lumi.ph*2.2)*0.06;
+  lCtx.save();lCtx.translate(lumi.x,lumi.y);lCtx.scale(wobbleScale,1/wobbleScale);
+  lCtx.beginPath();lCtx.arc(0,0,sz*2.8,0,Math.PI*2);
+  lCtx.strokeStyle=`rgba(168,210,255,${g*0.28})`;lCtx.lineWidth=1.2;lCtx.stroke();
+  lCtx.restore();
+
+  // Bright core
+  const cg=lCtx.createRadialGradient(lumi.x,lumi.y,0,lumi.x,lumi.y,sz*1.2);
+  cg.addColorStop(0,`rgba(255,255,255,${g})`);
+  cg.addColorStop(0.5,`rgba(200,225,255,${g*0.55})`);
+  cg.addColorStop(1,'rgba(200,225,255,0)');
+  lCtx.beginPath();lCtx.arc(lumi.x,lumi.y,sz*1.2,0,Math.PI*2);lCtx.fillStyle=cg;lCtx.fill();
+
+  // Bookmark mode ring
+  if(lumi.bmMode){
+    lCtx.beginPath();lCtx.arc(lumi.x,lumi.y,sz*3.5,0,Math.PI*2);
+    lCtx.strokeStyle=`rgba(248,140,200,${g*0.85})`;lCtx.lineWidth=1.8;
+    lCtx.setLineDash([4,4]);lCtx.stroke();lCtx.setLineDash([]);
+  }
+}
+
+// ══ MAIN LOOP ══
+function loop(){
+  fCtx.clearRect(0,0,W,H);
+  ffs.forEach(f=>{f.tick();f.draw(fCtx,epiMode);});
+  drawStars();drawClouds();
+  updateLumi();drawLumi();
+  requestAnimationFrame(loop);
+}
 loop();
 
-// === SCROLL REVEAL ===
-const reveals = document.querySelectorAll('.reveal');
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if (e.isIntersecting) e.target.classList.add('visible');
+// ══ TITLE — INDIVIDUAL LETTER GLITCH ══
+(function(){
+  const el=document.getElementById('tjp');
+  const txt=el.textContent.trim();
+  el.textContent='';
+  [...txt].forEach((ch,i)=>{
+    const s=document.createElement('span');
+    s.className='ch';s.textContent=ch;
+    s.style.animationDelay=(0.85+i*0.28)+'s';
+    el.appendChild(s);
   });
-}, { threshold: 0.08 });
-reveals.forEach(r => observer.observe(r));
+})();
+
+(function(){
+  const el=document.getElementById('tfab');
+  const txt=el.textContent.trim();
+  el.textContent='';
+  [...txt].forEach(ch=>{
+    const s=document.createElement('span');
+    s.className='fl';s.textContent=ch;
+    el.appendChild(s);
+  });
+})();
+
+(function(){
+  const el=document.getElementById('tromaji');
+  const txt=el.textContent.trim();
+  el.textContent='';
+  [...txt].forEach(ch=>{
+    if(ch===' '){el.appendChild(document.createTextNode('\u00A0\u00A0'));}
+    else{const s=document.createElement('span');s.className='rl';s.textContent=ch;el.appendChild(s);}
+  });
+})();
+
+function glitchOne(){
+  const pool=[
+    ...document.querySelectorAll('#tjp .ch'),
+    ...document.querySelectorAll('#tfab .fl'),
+    ...document.querySelectorAll('#tromaji .rl'),
+  ];
+  if(!pool.length)return;
+  // Glitch 1-3 random letters simultaneously
+  const count=1+Math.floor(Math.random()*3);
+  const shuffled=[...pool].sort(()=>Math.random()-0.5).slice(0,count);
+  shuffled.forEach(el=>{
+    el.classList.add('lg');
+    setTimeout(()=>el.classList.remove('lg'),240);
+  });
+  setTimeout(glitchOne,8000+Math.random()*9000);
+}
+setTimeout(glitchOne,6500);
+setTimeout(()=>{
+  const tb=document.getElementById('title-block');
+  if(tb)tb.style.animation='tFloat 8s ease-in-out infinite';
+},5800);
+
+// ══ BEGIN BUTTON ══
+function touchOrClick(el,fn){
+  el.addEventListener('click',fn);
+  el.addEventListener('touchend',e=>{e.preventDefault();fn(e);},{passive:false});
+}
+touchOrClick(document.getElementById('begin-btn'),()=>{
+  document.getElementById('prologue-start').scrollIntoView({behavior:'smooth'});
+});
+
+// ══ LUMI PROLOGUE APPEARANCE ══
+const prologObs=new IntersectionObserver(entries=>{
+  if(entries[0].isIntersecting&&!lumi.visible){
+    lumi.visible=true;
+    lumi.x=Math.random()*W*0.6+W*0.2;
+    lumi.y=Math.random()*H*0.4+H*0.2;
+    lumi.glow=0;
+    lumiNewTarget();
+  }
+},{threshold:0.15});
+prologObs.observe(document.getElementById('prologue-start'));
+
+// ══ CH1 DETECTION → LUMI WAKES ══
+const ch1Obs=new IntersectionObserver(entries=>{
+  if(entries[0].isIntersecting&&!lumi.active){
+    lumi.active=true;
+    startTimers();
+    setTimeout(()=>showMsg("I've been here since the beginning. Just so you know."),4000);
+  }
+},{threshold:0.25});
+ch1Obs.observe(document.getElementById('ch1'));
+
+// ══ LUMI MESSAGES ══
+const bubble=document.getElementById('lumi-bubble');
+let bubTmo=null;
+
+function showMsg(txt,dur=6000){
+  if(!lumi.active)return;
+  // Stop movement for ~1 min while talking
+  lumi.talking=true;
+  clearTimeout(lumi.stopTimer);lumi.stopTimer=null;
+  clearTimeout(lumi.talkTimer);
+  lumi.talkTimer=setTimeout(()=>{lumi.talking=false;lumiNewTarget();},60000);
+
+  // Position bubble
+  let bx=lumi.x+26,by=lumi.y-88;
+  if(bx+248>W)bx=lumi.x-258;if(bx<8)bx=8;
+  if(by<8)by=lumi.y+36;if(by+180>H)by=H-190;
+  bubble.style.left=bx+'px';bubble.style.top=by+'px';
+  bubble.style.transform='';
+  bubble.textContent=txt;
+  bubble.classList.add('show');
+  clearTimeout(bubTmo);
+  bubTmo=setTimeout(()=>{
+    bubble.classList.remove('show');
+    clearTimeout(lumi.talkTimer);
+    setTimeout(()=>{lumi.talking=false;lumiNewTarget();},1000);
+  },dur);
+}
+
+const WATER=["Drink some water. I'll wait.","Water. This is not optional.","Have you had water recently? I thought not.","Hey. Hydrate. The story will still be here.","Seriously though. Water."];
+const BM=["Tap me, then tap any word to save your place.","You can mark where you are — just tap me first.","I can hold your place. Tap me to start.","Bookmark tip: tap me, then tap the line you're on."];
+const HINTS=["Soren stood at windows for too long. Sound like anyone you know?","The sparrows. Remember the sparrows.","Did you notice the prologue question comes back at the end?","Everything in this city was designed. Even the loneliness.","Elton built everything except the one thing he needed.","This next part. Just... be ready.","The dome's sky changed at exactly 7am every day. Elton chose 7.","Six before Soren. Six tries before something finally held.","What a thing is built to be and what it becomes — not always the same.","The photograph on the desk. Look at the boy's face."];
+const FUNNY=["Still here? Good. Me too. Obviously.","You've been reading for a while. I'm not complaining.","That last chapter. I know. I was there too.","Don't mind me. Just floating.","You're doing great. Not that you asked."];
+const MEALS={m:"Good morning. Breakfast before the dome, please.",l:"Lunch exists. Soren can wait.",d:"Dinner time. The book will still be here.",e10:"Getting late. Maybe one more chapter, then rest.",l10:"It's late. Elton would say keep going. I'm saying sleep.",mn:"It's past midnight. Close the book. I'll hold your place."};
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+
+let wtIdx=0,hmIdx=0;
+function schedWater(){setTimeout(()=>{if(lumi.active)showMsg(rnd(WATER),7000);schedWater();},(1200+Math.random()*600)*1000);}
+function schedBM(){setTimeout(()=>{if(lumi.active&&!lumi.bmMode)showMsg(rnd(BM),6500);schedBM();},(300+Math.random()*60)*1000);}
+function schedHint(){setTimeout(()=>{if(lumi.active){showMsg(Math.random()>0.4?HINTS[hmIdx%HINTS.length]:rnd(FUNNY),7000);hmIdx++;}schedHint();},(480+Math.random()*360)*1000);}
+function checkTime(){if(!lumi.active)return;const h=new Date().getHours();let m=null;if(h>=6&&h<11)m=MEALS.m;else if(h>=12&&h<13)m=MEALS.l;else if(h>=18&&h<20)m=MEALS.d;else if(h>=21&&h<22)m=MEALS.e10;else if(h>=22)m=MEALS.l10;else if(h>=0&&h<3)m=MEALS.mn;if(m)showMsg(m,7500);}
+
+let timersOn=false;
+function startTimers(){
+  if(timersOn)return;timersOn=true;
+  setTimeout(schedWater,70000);setTimeout(schedBM,25000);
+  setTimeout(schedHint,110000);setInterval(checkTime,120000);
+  setTimeout(checkTime,5000);
+}
+
+// Lumi parks right side every ~6 min for BM reminder
+setInterval(()=>{
+  if(!lumi.active||lumi.talking)return;
+  lumi.tx=W-60;lumi.ty=H*0.45+Math.random()*H*0.1;
+  setTimeout(()=>showMsg(rnd(BM),6000),3000);
+},360000);
+
+// ══ BOOKMARK SYSTEM ══
+const bmRestore=document.getElementById('bookmark-restore');
+const BM_KEY='fab_bm_v2';
+
+function handleLumiTap(cx,cy){
+  if(!lumi.visible)return;
+  const dx=cx-lumi.x,dy=cy-lumi.y;
+  if(Math.sqrt(dx*dx+dy*dy)<42){
+    if(lumi.revealed){
+      // show reveal msg again
+      showRevealMsg();return;
+    }
+    if(!lumi.active)return;
+    lumi.bmMode=!lumi.bmMode;
+    showMsg(lumi.bmMode?"Now tap any word on the page to bookmark it.":"Bookmark mode off.",4000);
+  }
+}
+
+lumiCv.addEventListener('click',e=>handleLumiTap(e.clientX,e.clientY));
+lumiCv.addEventListener('touchend',e=>{
+  e.preventDefault();
+  const t=e.changedTouches[0];
+  handleLumiTap(t.clientX,t.clientY);
+},{passive:false});
+
+document.querySelectorAll('.ns p').forEach(p=>{
+  function bmTap(e){
+    if(!lumi.bmMode)return;
+    const rect=p.getBoundingClientRect();
+    localStorage.setItem(BM_KEY,window.scrollY+rect.top);
+    lumi.bmMode=false;
+    showMsg("Saved. I'll remember this for you.",4500);
+    bmRestore.classList.add('show');
+  }
+  p.addEventListener('click',bmTap);
+  p.addEventListener('touchend',e=>{e.preventDefault();bmTap(e);},{passive:false});
+});
+
+if(localStorage.getItem(BM_KEY)){
+  setTimeout(()=>{if(lumi.active)bmRestore.classList.add('show');},5000);
+}
+touchOrClick(bmRestore,()=>{
+  const pos=localStorage.getItem(BM_KEY);
+  if(pos)window.scrollTo({top:parseInt(pos)-120,behavior:'smooth'});
+  bmRestore.classList.remove('show');
+});
+
+// ══ EPILOGUE REVEAL ══
+const lastLine=document.getElementById('last-line');
+function showRevealMsg(){
+  bubble.style.left='50%';bubble.style.top='50%';
+  bubble.style.transform='translate(-50%,-50%)';
+  bubble.style.maxWidth='305px';bubble.style.fontSize='14.5px';
+  bubble.style.lineHeight='2.0';bubble.style.textAlign='center';
+  bubble.style.padding='26px 30px';
+  bubble.style.borderColor='rgba(168,210,255,0.45)';
+  bubble.style.color='rgba(210,235,255,0.97)';
+  bubble.textContent="You reached the end.\n\nI've been here the whole time.\nEvery chapter. Every page.\nEvery moment you almost stopped.\n\nI never said my name because\nyou didn't need to know it yet.\n\nBut now you do.\n\n— Lumi";
+  bubble.classList.add('show');
+  clearTimeout(bubTmo);
+  bubTmo=setTimeout(()=>{
+    bubble.classList.remove('show');
+    setTimeout(()=>{
+      bubble.style.transform='';bubble.style.left='';bubble.style.top='';
+      bubble.style.maxWidth='230px';bubble.style.fontSize='14px';
+      bubble.style.textAlign='';bubble.style.padding='13px 17px';
+      bubble.style.borderColor='';bubble.style.color='';
+    },800);
+  },15000);
+}
+
+const epiObs=new IntersectionObserver(entries=>{
+  if(entries[0].isIntersecting&&!lumi.revealed){
+    lumi.revealed=true;epiMode=true;
+    lumi.talking=false;
+    setTimeout(()=>{
+      // Bloom colors
+      ambEl.style.backgroundColor='rgba(155,190,255,0.1)';
+      setSky('rosedawn');
+      // Extra burst fireflies
+      for(let i=0;i<18;i++)setTimeout(()=>{
+        const f=ffs[i%ffs.length];f.init(true);
+        f.pink=Math.random()>0.5;f.y=Math.random()*H;
+      },i*55);
+      // Poof transform
+      setTimeout(()=>{
+        lumi.talking=false;
+        showRevealMsg();
+      },2200);
+    },1600);
+  }
+},{threshold:0.88});
+if(lastLine)epiObs.observe(lastLine);
+
+// ══ SCROLL REVEAL ══
+const revObs=new IntersectionObserver(es=>{
+  es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});
+},{threshold:0.07});
+document.querySelectorAll('.reveal').forEach(r=>revObs.observe(r));
 </script>
 </body>
 </html>
